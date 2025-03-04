@@ -41,7 +41,6 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     public IMessage onMessage(PacketServerToClient message, MessageContext ctx) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> {
-            Container container = mc.player.openContainer;
             WorldClient world = Minecraft.getMinecraft().world;
             NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
             switch (ServerToClient.valueOf(message.type)) {
@@ -51,16 +50,17 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
                 }
                 case DELETE_NETWORK: {
                     storage.removeNetwork(message.compound.getUniqueId("networkUuid"));
+                    break;
                 }
-            }
-            if (container instanceof NetworkHubContainer) {
-                switch (ServerToClient.valueOf(message.type)) {
-                    case UPDATE_GUI_SELECTED_NETWORK: {
+                case UPDATE_GUI_SELECTED_NETWORK: {
+                    Container container = mc.player.openContainer;
+                    if (container instanceof NetworkHubContainer) {
                         ((NetworkHubContainer) container).selectedNetwork = message.compound.getUniqueId("networkUuid");
-                        break;
                     }
+                    break;
                 }
             }
+
         });
         return null;
     }

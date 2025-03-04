@@ -7,10 +7,12 @@ import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentString;
 
 import java.util.Map;
 import java.util.UUID;
@@ -53,8 +55,8 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
         switch (button) {
             case 0: { // 切换选择的网络
                 UUID uuid = compound.getUniqueId("networkUuid");
-                NetworkStatus net = this.storage.getNetwork(uuid);
-                if (net != null && net.hasPermission(this.player.getGameProfile().getId())) {
+                NetworkStatus network = this.storage.getNetwork(uuid);
+                if (network != null && network.hasPermission(this.player, 0)) {
                     this.selectedNetwork = uuid;
                 }
                 NBTTagCompound tag = new NBTTagCompound();
@@ -64,10 +66,10 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
             }
             case 1: { // 创建网络
                 String name = compound.getString("name");
-                NetworkStatus net = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, networkHub.getWorld().provider.getDimension(), networkHub.getPos()));
+                NetworkStatus network = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, networkHub.getWorld().provider.getDimension(), networkHub.getPos()));
                 this.networkHub.setHead(true);
-                this.networkHub.setNetworkUuid(net.getUuid());
-                this.selectedNetwork = net.getUuid();
+                this.networkHub.setNetworkUuid(network.getUuid());
+                this.selectedNetwork = network.getUuid();
                 NBTTagCompound tag = new NBTTagCompound();
                 tag.setUniqueId("networkUuid", this.selectedNetwork);
                 YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
@@ -75,36 +77,53 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                 break;
             }
             case 996: { // 删除网络
-                storage.removeNetwork(this.selectedNetwork);
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setUniqueId("networkUuid", this.selectedNetwork);
-                YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORK, tag));
-                this.selectedNetwork = new UUID(0, 0);
+                NetworkStatus network = this.storage.getNetwork(this.selectedNetwork);
+                if (network != null && network.hasPermission(this.player, 1)) {
+                    storage.removeNetwork(this.selectedNetwork);
+                    NBTTagCompound tag = new NBTTagCompound();
+                    tag.setUniqueId("networkUuid", this.selectedNetwork);
+                    YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORK, tag));
+                    this.selectedNetwork = new UUID(0, 0);
+                } else {
+                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                }
                 this.networkHub.sync();
                 break;
             }
             case 997: { // 连接网络
-                if (!this.networkHub.getNetworkUuid().equals(this.selectedNetwork)) {
-                    this.networkHub.breakConnection();
+                NetworkStatus network = this.storage.getNetwork(this.selectedNetwork);
+                if (network != null && network.hasPermission(this.player, 0)) {
+                    if (!this.networkHub.getNetworkUuid().equals(this.selectedNetwork)) {
+                        this.networkHub.breakConnection();
+                    }
+                    this.networkHub.setNetworkUuid(this.selectedNetwork);
+                } else {
+                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
                 }
-                this.networkHub.setNetworkUuid(this.selectedNetwork);
                 this.networkHub.sync();
                 break;
             }
             case 998: { // 断开连接
-                this.networkHub.breakConnection();
-                this.selectedNetwork = new UUID(0, 0);
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setUniqueId("networkUuid", this.selectedNetwork);
-                YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
+                NetworkStatus network = this.storage.getNetwork(this.networkHub.getNetworkUuid());
+                if (network != null && network.hasPermission(this.player, 0)) {
+                    this.networkHub.breakConnection();
+                    this.selectedNetwork = new UUID(0, 0);
+                    NBTTagCompound tag = new NBTTagCompound();
+                    tag.setUniqueId("networkUuid", this.selectedNetwork);
+                    YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
+                } else {
+                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                }
                 this.networkHub.sync();
                 break;
             }
             case 999: { // 切换网络是否公开
                 NetworkStatus network = this.storage.getNetwork(selectedNetwork);
-                if (network != null) {
+                if (network != null && network.hasPermission(this.player, 1)) {
                     network.setPublic(!network.isPublic());
                     network.setNeedTellClient(true);
+                } else {
+                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
                 }
                 this.networkHub.sync();
                 break;

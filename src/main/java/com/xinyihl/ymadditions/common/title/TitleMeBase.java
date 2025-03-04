@@ -13,15 +13,12 @@ import appeng.me.helpers.MachineSource;
 import appeng.util.Platform;
 import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -80,37 +77,27 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     @Nonnull
     @Override
     public NBTTagCompound getUpdateTag() {
-        return writeToNBT(new NBTTagCompound());
+        return this.writeToNBT(new NBTTagCompound());
     }
 
     @Override
     public void handleUpdateTag(@Nonnull NBTTagCompound tag) {
-        readFromNBT(tag);
+        this.readFromNBT(tag);
     }
 
     public void sync() {
-        if (!this.world.isRemote) {
-            SPacketUpdateTileEntity packet = this.getUpdatePacket();
-            PlayerChunkMapEntry trackingEntry = ((WorldServer) this.world).getPlayerChunkMap().getEntry(this.pos.getX() >> 4, this.pos.getZ() >> 4);
-            if (trackingEntry != null) {
-                for (EntityPlayerMP player : trackingEntry.getWatchingPlayers()) {
-                    player.connection.sendPacket(packet);
-                }
-            }
-            this.notifyNeighbors();
-        }
+        this.markDirty();
+        this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);
+        this.notifyNeighbors();
     }
 
     @Nonnull
     public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(this.getPos(), 157986, this.getUpdateTag());
+        return new SPacketUpdateTileEntity(this.getPos(), 2555, this.getUpdateTag());
     }
 
     public final void onDataPacket(@Nonnull NetworkManager manager, @Nonnull SPacketUpdateTileEntity packet) {
-        super.onDataPacket(manager, packet);
-        if (packet.getTileEntityType() == 157986) {
-            this.handleUpdateTag(packet.getNbtCompound());
-        }
+        this.readFromNBT(packet.getNbtCompound());
     }
 
     @Nonnull

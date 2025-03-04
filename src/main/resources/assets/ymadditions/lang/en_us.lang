@@ -2,6 +2,8 @@
 itemGroup.yudream_tab=YM-Additions
 tile.ymadditions.network_hub.name=ME Wireless Transceiver
 
+statusmessage.ymadditions.info.nopermission=§cYou don't have permission.
+
 tooltip.ymadditions.tile_me_base.missing_channel=Device missing channel
 tooltip.ymadditions.tile_me_base.online=Device online
 tooltip.ymadditions.tile_me_base.offline=Device offline

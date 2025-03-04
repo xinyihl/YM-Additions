@@ -93,6 +93,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                 } else {
                     if (this.getPos().equals(network.getPos())) {
                         this.setHead(true);
+                        this.sync();
                     } else {
                         if (!this.isConnected) {
                             this.setupConnection(network);
@@ -100,7 +101,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                     }
                 }
             }
-            this.sync();
         }
     }
 
@@ -128,7 +128,9 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     public void addProbeInfo(Consumer<String> consumer, Function<String, String> loc) {
         super.addProbeInfo(consumer, loc);
         consumer.accept(loc.apply("tile_network_hub.state." + this.isConnected()));
-        consumer.accept(loc.apply("tile_network_hub.network") + " " + this.getNetworkUuid().toString());
+        if (Configurations.GENERAL_CONFIG.doNetworkUUIDShow){
+            consumer.accept(loc.apply("tile_network_hub.network") + " " + this.getNetworkUuid().toString());
+        }
     }
 
     public void setupConnection(NetworkStatus network) {
@@ -214,6 +216,10 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
 
     public void setHead(boolean head) {
         this.isHead = head;
+    }
+
+    public UUID getOwner() {
+        return owner;
     }
 
     public UUID getNetworkUuid() {

@@ -1,7 +1,6 @@
-package com.xinyihl.ymadditions.common.event;
+package com.xinyihl.ymadditions.common.container;
 
 import com.xinyihl.ymadditions.client.gui.NetworkHubGuiContainer;
-import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -11,7 +10,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class GUIHandler implements IGuiHandler {
+public class GUIContainerHandler implements IGuiHandler {
 
     public static final int GUI_NETWORK_HUB = 1;
 

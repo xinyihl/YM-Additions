@@ -1,9 +1,12 @@
 package com.xinyihl.ymadditions.common.api.data;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.server.permission.PermissionAPI;
+import net.minecraftforge.server.permission.context.PlayerContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ public class NetworkStatus {
     private UUID owner = new UUID(0, 0);
     @Nonnull
     private String networkName = "Unknown";
-    private boolean needTellClient = true;
+    private boolean needTellClient = false;
     private boolean isPublic = false;
     private int dimensionId = 0;
     private int surplusChannels = 0;
@@ -94,11 +97,6 @@ public class NetworkStatus {
     }
 
     @Nonnull
-    public UUID getOwner() {
-        return owner;
-    }
-
-    @Nonnull
     public String getNetworkName() {
         return networkName;
     }
@@ -120,10 +118,6 @@ public class NetworkStatus {
         return pos;
     }
 
-    public void setPos(@Nonnull BlockPos pos) {
-        this.pos = pos;
-    }
-
     @Nonnull
     public List<BlockPos> getTargetPos() {
         return targetPos;
@@ -137,8 +131,15 @@ public class NetworkStatus {
         targetPos.remove(pos);
     }
 
-    public boolean hasPermission(@Nonnull UUID player) {
-        return this.isPublic || player.equals(this.owner);
+    public boolean hasPermission(@Nonnull EntityPlayer player, int permission) {
+        //todo 权限系统
+        boolean isOp = PermissionAPI.hasPermission(player.getGameProfile(), "player.op", new PlayerContext(player));
+        switch (permission) {
+            case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner);
+            case 1: return isOp || player.getGameProfile().getId().equals(this.owner);
+            //case 2: return player.getGameProfile().getId().equals(this.owner);
+            default: return false;
+        }
     }
 
     @Override

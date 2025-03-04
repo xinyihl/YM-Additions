@@ -1,6 +1,6 @@
 package com.xinyihl.ymadditions;
 
-import com.xinyihl.ymadditions.common.event.GUIHandler;
+import com.xinyihl.ymadditions.common.container.GUIContainerHandler;
 import com.xinyihl.ymadditions.common.integration.TheOneProbe;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
@@ -28,6 +28,6 @@ public class YMAdditions {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        NetworkRegistry.INSTANCE.registerGuiHandler(YMAdditions.instance, new GUIHandler());
+        NetworkRegistry.INSTANCE.registerGuiHandler(YMAdditions.instance, new GUIContainerHandler());
     }
 }

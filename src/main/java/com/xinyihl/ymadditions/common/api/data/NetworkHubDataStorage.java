@@ -2,6 +2,7 @@ package com.xinyihl.ymadditions.common.api.data;
 
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.Tags;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -115,12 +116,12 @@ public class NetworkHubDataStorage extends WorldSavedData {
     }
 
     @Nonnull
-    public List<NetworkStatus> getNeedUpdateNetworks(UUID player) {
-        return networks.values().stream().filter(p -> {
-            if (p.isPublic() || p.getOwner().equals(player)) {
-                return p.isNeedTellClient();
-            }
-            return false;
-        }).collect(Collectors.toList());
+    public List<NetworkStatus> getPlayerNeedUpdateNetworks(EntityPlayer player) {
+        return networks.values().stream().filter(p -> p.hasPermission(player, 0) && p.isNeedTellClient()).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    public List<NetworkStatus> getPlayerNetworks(EntityPlayer player) {
+        return networks.values().stream().filter(p -> p.hasPermission(player, 0)).collect(Collectors.toList());
     }
 }
