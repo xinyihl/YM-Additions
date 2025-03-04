@@ -1,0 +1,14 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "ymadditions:network_hub_on"
+  },
+  "variants": {
+    "connect=true": {
+      "model": "ymadditions:network_hub_on"
+    },
+    "connect=false": {
+      "model": "ymadditions:network_hub_off"
+    }
+  }
+}

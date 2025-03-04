@@ -1,0 +1,12 @@
+[
+  {
+    "modid": "ymadditions",
+    "name": "YM-Additions",
+    "description": "ME Wireless Transceiver",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "authorList": [
+      "xinyihl"
+    ]
+  }
+]

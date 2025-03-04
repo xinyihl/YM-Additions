@@ -1,0 +1,122 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.3.27'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+}
+
+version = project.mod_version
+group = project.maven_group
+archivesBaseName = project.mod_name
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+        vendor.set(JvmVendorSpec.AZUL)
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+configurations {
+    embed
+    implementation.extendsFrom(embed)
+}
+
+minecraft {
+    mcVersion = '1.12.2'
+
+    mcpMappingChannel = 'stable'
+    mcpMappingVersion = '39'
+
+    username = 'Developer'
+
+    useDependencyAccessTransformers = true
+
+    injectedTags.put('MOD_ID', project.archives_base_name)
+    injectedTags.put('MOD_NAME', project.mod_name)
+    injectedTags.put('VERSION', project.version)
+}
+
+tasks.runClient.configure {
+    args = ['--width', '1920', '--height', '1080']
+}
+
+tasks.injectTags.configure {
+    outputClassName.set("${project.group}.${project.archives_base_name}.Tags")
+}
+
+repositories {
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+    mavenLocal()
+}
+
+dependencies {
+    implementation rfg.deobf("curse.maven:theoneprobe-245211:2667280")
+    implementation rfg.deobf("curse.maven:ae2extendedlife-570458:5411078")
+    implementation rfg.deobf("curse.maven:hadenoughitems-557549:5229422")
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'mcversion', project.minecraft.version
+
+    filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
+        fcd.expand (
+                'version': project.version,
+                'mcversion': project.minecraft.version
+        )
+    }
+}
+
+jar {
+    manifest {
+        def attribute_map = [:]
+        attribute_map['Implementation-Title'] = project.name
+        attribute_map['Implementation-Version'] = project.version
+        attributes(attribute_map)
+    }
+    from(provider{ configurations.embed.collect {it.isDirectory() ? it : zipTree(it)} })
+}
+
+tasks.register('signJar') {
+    def keystorePath = file(System.getenv("GRADLE_USER_HOME") + "keystore.jks")
+    def keystoreAlias = "xinyihl"
+
+    def unsignedJar = file("$buildDir/libs/${jar.archiveBaseName.get()}-${jar.archiveVersion.get()}.jar")
+    def signedJar = file("$buildDir/libs/${jar.archiveBaseName.get()}-${jar.archiveVersion.get()}-signed.jar")
+
+    def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+    def keyPassword = System.getenv("KEY_PASSWORD")
+
+    doLast {
+        if (keystorePassword.isEmpty() || keyPassword.isEmpty()) {
+            throw new GradleException("Keystore passwords are not set in environment variables!")
+        }
+        ant.signjar(
+                jar: unsignedJar,
+                alias: keystoreAlias,
+                keystore: keystorePath,
+                storepass: keystorePassword,
+                keypass: keyPassword,
+                signedjar: signedJar
+        )
+    }
+}
+
+build.dependsOn signJar
+
+tasks.named("processIdeaSettings").configure {
+    dependsOn("injectTags")
+}

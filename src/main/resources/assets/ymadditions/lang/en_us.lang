@@ -1,0 +1,23 @@
+#PARSE_ESCAPES
+itemGroup.yudream_tab=YM-Additions
+tile.ymadditions.network_hub.name=ME Wireless Transceiver
+
+tooltip.ymadditions.tile_me_base.missing_channel=Device missing channel
+tooltip.ymadditions.tile_me_base.online=Device online
+tooltip.ymadditions.tile_me_base.offline=Device offline
+tooltip.ymadditions.tile_network_hub.state.true=Connection status: §aConnected
+tooltip.ymadditions.tile_network_hub.state.false=Connection status: §cNot connected
+tooltip.ymadditions.tile_network_hub.network=Network:
+
+gui.ymadditions.network_hub.button.create=Create
+gui.ymadditions.network_hub.button.delete=Delete
+gui.ymadditions.network_hub.button.connect=Connect
+gui.ymadditions.network_hub.button.disconnect=Disconnect
+gui.ymadditions.network_hub.button.public.desc=Toggle whether the network is public
+gui.ymadditions.network_hub.info.network_name=Name:
+gui.ymadditions.network_hub.info.surplus_channels=Surplus channels:
+gui.ymadditions.network_hub.info.dimension_id=Dimension ID:
+gui.ymadditions.network_hub.info.public.true=Public: Yes
+gui.ymadditions.network_hub.info.public.false=Public: No
+gui.ymadditions.network_hub.info.state.true=Connection status: Connected
+gui.ymadditions.network_hub.info.state.false=Connection status: Not connected
