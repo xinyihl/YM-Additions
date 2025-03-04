@@ -115,7 +115,7 @@ tasks.register('signJar') {
     }
 }
 
-build.dependsOn signJar
+//build.dependsOn signJar
 
 tasks.named("processIdeaSettings").configure {
     dependsOn("injectTags")
