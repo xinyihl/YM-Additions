@@ -153,7 +153,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             this.getProxy().setIdlePowerUsage(power);
             network.addTargetPos(this.getPos());
         } catch (FailedConnectionException e) {
-            throw new RuntimeException(e);
+            this.unsetAll();
         }
     }
 

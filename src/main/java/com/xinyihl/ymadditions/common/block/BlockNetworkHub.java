@@ -6,6 +6,7 @@ import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.container.GUIContainerHandler;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -77,7 +78,7 @@ public class BlockNetworkHub extends Block {
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileNetworkHub) {
                 NetworkStatus network = NetworkHubDataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());
-                if (playerIn.getGameProfile().getId().equals(((TileNetworkHub) te).getOwner()) || (network != null && network.hasPermission(playerIn, 0))) {
+                if (Utils.isPlayerOp(playerIn) || playerIn.getGameProfile().getId().equals(((TileNetworkHub) te).getOwner()) || (network != null && network.hasPermission(playerIn, 0))) {
                     playerIn.openGui(YMAdditions.instance, GUIContainerHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
                 } else {
                     playerIn.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);

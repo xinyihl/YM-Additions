@@ -5,7 +5,6 @@ import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
-import mezz.jei.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
@@ -19,8 +18,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -28,6 +25,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,55 +60,24 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.networkHubContainer = networkHubContainer;
     }
 
-    private boolean closeJei = false;
-
     private NetworkStatus showInfo() {
         return networkHubContainer.networks.getOrDefault(networkHubContainer.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, 0, new BlockPos(0, 0, 0)));
     }
 
-    @Override
-    @Optional.Method(
-            modid = "jei"
-    )
-    public void onGuiClosed() {
-        super.onGuiClosed();
-        if(closeJei){
-            Config.toggleOverlayEnabled();
-        }
-    }
-
-    @Optional.Method(
-            modid = "jei"
-    )
-    public void onGuiOpened() {
-        if(Config.isOverlayEnabled()){
-            Config.toggleOverlayEnabled();
-            closeJei = true;
-        }
+    public List<Rectangle> getExtraAreas() {
+        List<Rectangle> extraAreas = new ArrayList<>();
+        extraAreas.add(new Rectangle(this.lockButton.x, this.lockButton.y, this.lockButton.width, this.lockButton.height));
+        return extraAreas;
     }
 
     @Override
     public void initGui() {
         super.initGui();
-        if (Loader.isModLoaded("jei")) {
-            this.onGuiOpened();
-        }
         this.createButton = new GuiButton(995, guiLeft + 26, guiTop + 110, 70, 18, I18n.format("gui.ymadditions.network_hub.button.create"));
         this.deleteButton = new GuiButton(996, guiLeft + 26, guiTop + 135, 70, 18, I18n.format("gui.ymadditions.network_hub.button.delete"));
         this.connectButton = new GuiButton(997, guiLeft + 103, guiTop + 110, 70, 18, I18n.format("gui.ymadditions.network_hub.button.connect"));
         this.disConnectButton = new GuiButton(998, guiLeft + 103, guiTop + 135, 70, 18, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
-        this.lockButton = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12) {
-            @Override
-            public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-                super.drawButton(mc, mouseX, mouseY, partialTicks);
-                if (this.visible) {
-                    int relx = mouseX - this.x, rely = mouseY - this.y;
-                    if (relx >= 0 && rely >= 0 && relx < this.width && rely < this.height) {
-                        mc.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX + 5, mouseY + 5, 0xFFFFFF);
-                    }
-                }
-            }
-        };
+        this.lockButton = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12);
         this.textField = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 18);
 
         if (this.networkHubContainer.networkHub.isConnected()) {
@@ -174,6 +141,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         GlStateManager.disableRescaleNormal();
@@ -214,6 +182,10 @@ public class NetworkHubGuiContainer extends GuiContainer {
 
         if (isCreating) {
             this.textField.drawTextBox();
+        }
+
+        if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
+            this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX, mouseY);
         }
     }
 
@@ -311,6 +283,10 @@ public class NetworkHubGuiContainer extends GuiContainer {
 
     private boolean isMouseOverTextField(GuiTextField textField, int mouseX, int mouseY) {
         return mouseX >= textField.x && mouseX < textField.x + textField.width && mouseY >= textField.y && mouseY < textField.y + textField.height;
+    }
+
+    private boolean isMouseOverButton(GuiButton button, int mouseX, int mouseY) {
+        return mouseX >= button.x && mouseY >= button.y && mouseX < button.x + button.width && mouseY < button.y + button.height;
     }
 
     public static class NetButton extends GuiButton {

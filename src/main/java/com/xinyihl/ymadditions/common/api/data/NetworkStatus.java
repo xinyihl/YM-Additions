@@ -1,12 +1,11 @@
 package com.xinyihl.ymadditions.common.api.data;
 
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.server.permission.PermissionAPI;
-import net.minecraftforge.server.permission.context.PlayerContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -131,10 +130,10 @@ public class NetworkStatus {
         targetPos.remove(pos);
     }
 
-    public boolean hasPermission(@Nonnull EntityPlayer player, int permission) {
+    public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
         //todo 权限系统
-        boolean isOp = PermissionAPI.hasPermission(player.getGameProfile(), "player.op", new PlayerContext(player));
-        switch (permission) {
+        boolean isOp = Utils.isPlayerOp(player);
+        switch (level) {
             case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner);
             case 1: return isOp || player.getGameProfile().getId().equals(this.owner);
             //case 2: return player.getGameProfile().getId().equals(this.owner);
