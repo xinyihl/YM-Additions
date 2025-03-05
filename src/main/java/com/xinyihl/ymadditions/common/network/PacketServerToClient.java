@@ -4,9 +4,9 @@ import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -41,7 +41,7 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     public IMessage onMessage(PacketServerToClient message, MessageContext ctx) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> {
-            WorldClient world = Minecraft.getMinecraft().world;
+            World world = Minecraft.getMinecraft().world;
             NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
             switch (ServerToClient.valueOf(message.type)) {
                 case UPDATE_NETWORKS: {

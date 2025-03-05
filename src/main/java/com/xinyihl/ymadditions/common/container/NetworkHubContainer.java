@@ -7,12 +7,11 @@ import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.Map;
 import java.util.UUID;
@@ -85,7 +84,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                     YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORK, tag));
                     this.selectedNetwork = new UUID(0, 0);
                 } else {
-                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
                 this.networkHub.sync();
                 break;
@@ -98,7 +97,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                     }
                     this.networkHub.setNetworkUuid(this.selectedNetwork);
                 } else {
-                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
                 this.networkHub.sync();
                 break;
@@ -112,7 +111,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                     tag.setUniqueId("networkUuid", this.selectedNetwork);
                     YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
                 } else {
-                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
                 this.networkHub.sync();
                 break;
@@ -123,7 +122,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                     network.setPublic(!network.isPublic());
                     network.setNeedTellClient(true);
                 } else {
-                    this.player.sendStatusMessage(new TextComponentString(I18n.format("statusmessage.ymadditions.info.nopermission")), true);
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
                 this.networkHub.sync();
                 break;
