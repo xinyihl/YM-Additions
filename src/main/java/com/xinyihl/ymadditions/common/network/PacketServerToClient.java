@@ -11,6 +11,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PacketServerToClient implements IMessage, IMessageHandler<PacketServerToClient, IMessage> {
     private String type;
@@ -38,6 +40,7 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public IMessage onMessage(PacketServerToClient message, MessageContext ctx) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> {
