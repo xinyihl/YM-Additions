@@ -73,12 +73,12 @@ public class NetworkHubGuiContainer extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        this.createButton = new GuiButton(995, guiLeft + 26, guiTop + 110, 70, 18, I18n.format("gui.ymadditions.network_hub.button.create"));
-        this.deleteButton = new GuiButton(996, guiLeft + 26, guiTop + 135, 70, 18, I18n.format("gui.ymadditions.network_hub.button.delete"));
-        this.connectButton = new GuiButton(997, guiLeft + 103, guiTop + 110, 70, 18, I18n.format("gui.ymadditions.network_hub.button.connect"));
-        this.disConnectButton = new GuiButton(998, guiLeft + 103, guiTop + 135, 70, 18, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
-        this.lockButton = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12);
-        this.textField = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 18);
+        this.createButton     = new GuiButton(995, guiLeft + 26 , guiTop + 110, 70, 20, I18n.format("gui.ymadditions.network_hub.button.create"));
+        this.deleteButton     = new GuiButton(996, guiLeft + 26 , guiTop + 135, 70, 20, I18n.format("gui.ymadditions.network_hub.button.delete"));
+        this.connectButton    = new GuiButton(997, guiLeft + 103, guiTop + 110, 70, 20, I18n.format("gui.ymadditions.network_hub.button.connect"));
+        this.disConnectButton = new GuiButton(998, guiLeft + 103, guiTop + 135, 70, 20, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
+        this.lockButton       = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12);
+        this.textField        = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 20);
 
         if (this.networkHubContainer.networkHub.isConnected()) {
             this.createButton.enabled = false;
@@ -119,7 +119,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         for (int i = 0; i < 4; i++) {
             int index = scrollOffset / 20 + i;
             if (index >= networks.size()) break;
-            NetButton btn = new NetButton(index, guiLeft + 8, guiTop + 18 + i * 20 - scrollOffset % 20, 85, 18, networks.get(index).getNetworkName(), networks.get(index));
+            NetButton btn = new NetButton(index, guiLeft + 8, guiTop + 17 + i * 21 - scrollOffset % 20, 85, 20, networks.get(index).getNetworkName(), networks.get(index));
             this.networkButtons.add(btn);
         }
         this.lastScrollOffset = scrollOffset;
@@ -160,7 +160,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.maxScroll = Math.max(0, listHeight - visibleHeight);
 
         updateNetworksButtons();
-        ScissorHelper.enableScissor(mc, guiLeft + 8, guiTop + 16, 110, visibleHeight + 2);
+        ScissorHelper.enableScissor(mc, guiLeft + 8, guiTop + 17, 110, visibleHeight + 3);
         for (NetButton btn : networkButtons) {
             btn.drawButton(mc, mouseX, mouseY, partialTicks);
         }
@@ -177,8 +177,8 @@ public class NetworkHubGuiContainer extends GuiContainer {
         if (maxScroll > 0) {
             scrollBarY += (int) ((float) scrollOffset / maxScroll * (visibleHeight - scrollBarHeight));
         }
-        drawRect(guiLeft + SCROLL_BAR_LEFT, guiTop + 15, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, guiTop + 19 + visibleHeight, 0xFF9c9c9c);
-        drawRect(guiLeft + SCROLL_BAR_LEFT, scrollBarY, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, scrollBarY + scrollBarHeight + 4, 0xFF373737);
+        drawRect(guiLeft + SCROLL_BAR_LEFT, guiTop + 15, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, guiTop + 21 + visibleHeight,      0xFF9c9c9c);
+        drawRect(guiLeft + SCROLL_BAR_LEFT,       scrollBarY, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, scrollBarY + scrollBarHeight + 6, 0xFF373737);
 
         if (isCreating) {
             this.textField.drawTextBox();

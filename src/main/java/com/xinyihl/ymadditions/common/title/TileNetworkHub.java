@@ -25,7 +25,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.xinyihl.ymadditions.common.block.BlockNetworkHub.CONNECT;
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORK;
 
 public class TileNetworkHub extends TitleMeBase implements ITickable {
@@ -206,7 +205,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     }
 
     public void setConnected(boolean connected) {
-        this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos).withProperty(CONNECT, connected), 3);
         this.isConnected = connected;
     }
 
