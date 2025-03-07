@@ -21,8 +21,10 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,7 +44,6 @@ public class BlockNetworkHub extends Block {
         this.setDefaultState(this.blockState.getBaseState().withProperty(CONNECT, false));
     }
 
-    @Nonnull
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(CONNECT, meta == 1);
@@ -61,11 +62,11 @@ public class BlockNetworkHub extends Block {
 
     @Nonnull
     @Override
-    public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, @Nonnull BlockPos pos) {
+    public IBlockState getActualState(@Nonnull IBlockState state,@Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos) {
         boolean connect = false;
-        TileEntity te = worldIn.getTileEntity(pos);
-        if (te instanceof TileNetworkHub) {
-            TileNetworkHub tn = (TileNetworkHub) te;
+        TileEntity tile = worldIn instanceof ChunkCache ? ((ChunkCache)worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
+        if (tile instanceof TileNetworkHub) {
+            TileNetworkHub tn = (TileNetworkHub) tile;
             connect = tn.isConnected();
         }
         return super.getActualState(state, worldIn, pos).withProperty(CONNECT, connect);
@@ -109,11 +110,5 @@ public class BlockNetworkHub extends Block {
     @Override
     public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState iBlockState) {
         return new TileNetworkHub();
-    }
-
-    @Override
-    public void breakBlock(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
-        super.breakBlock(world, pos, state);
-
     }
 }

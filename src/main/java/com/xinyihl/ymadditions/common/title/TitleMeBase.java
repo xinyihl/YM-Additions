@@ -6,19 +6,20 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
-import appeng.me.GridAccessException;
 import appeng.me.helpers.AENetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.me.helpers.MachineSource;
-import appeng.util.Platform;
 import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,17 +38,6 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     }
 
     public abstract ItemStack getVisualItemStack();
-
-    protected void notifyNeighbors() {
-        if (this.proxy.isActive()) {
-            try {
-                this.proxy.getTick().wakeDevice(this.proxy.getNode());
-            } catch (GridAccessException e) {
-                //Ignore
-            }
-            Platform.notifyBlocksOfNeighbors(this.getWorld(), this.getPos());
-        }
-    }
 
     @Override
     protected void setWorldCreate(@Nonnull final World worldIn) {
@@ -86,9 +76,15 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     }
 
     public void sync() {
-        this.markDirty();
-        this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);
-        this.notifyNeighbors();
+        if (!this.world.isRemote) {
+            SPacketUpdateTileEntity packet = this.getUpdatePacket();
+            PlayerChunkMapEntry trackingEntry = ((WorldServer)this.world).getPlayerChunkMap().getEntry(this.pos.getX() >> 4, this.pos.getZ() >> 4);
+            if (trackingEntry != null) {
+                for (EntityPlayerMP player : trackingEntry.getWatchingPlayers()) {
+                    player.connection.sendPacket(packet);
+                }
+            }
+        }
     }
 
     @Nonnull

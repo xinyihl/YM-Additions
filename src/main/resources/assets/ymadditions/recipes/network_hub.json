@@ -1,0 +1,35 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern":
+  [
+    "xax",
+    "dbd",
+    "xcx"
+  ],
+  "key":
+  {
+    "a":
+    {
+      "item": "appliedenergistics2:wireless_access_point"
+    },
+    "c": {
+      "type": "appliedenergistics2:part",
+      "part": "cable_dense_smart"
+    },
+    "d": {
+      "type": "appliedenergistics2:part",
+      "part": "material.wireless_booster"
+    },
+    "b": {
+      "item": "appliedenergistics2:quantum_link"
+    },
+    "x": {
+      "item": "appliedenergistics2:quantum_ring"
+    }
+  },
+  "result":
+  {
+    "item": "ymadditions:network_hub",
+    "count": 1
+  }
+}

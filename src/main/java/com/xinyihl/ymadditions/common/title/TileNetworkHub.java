@@ -13,6 +13,7 @@ import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.registry.BlocksAndItems;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.xinyihl.ymadditions.common.block.BlockNetworkHub.CONNECT;
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORK;
 
 public class TileNetworkHub extends TitleMeBase implements ITickable {
@@ -92,13 +94,14 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                 } else {
                     if (this.getPos().equals(network.getPos())) {
                         this.setHead(true);
-                        this.sync();
                     } else {
                         if (!this.isConnected) {
                             this.setupConnection(network);
+                            return;
                         }
                     }
                 }
+                this.sync();
             }
         }
     }
@@ -154,6 +157,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         } catch (FailedConnectionException e) {
             this.unsetAll();
         }
+        this.sync();
     }
 
     public void breakConnection() {
@@ -205,7 +209,14 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     }
 
     public void setConnected(boolean connected) {
-        this.isConnected = connected;
+        if (connected != this.isConnected) {
+            this.isConnected = connected;
+            IBlockState state = this.world.getBlockState(this.getPos());
+            if(state.getBlock() == BlocksAndItems.blockNetworkHub) {
+                this.markDirty();
+                this.world.notifyBlockUpdate(this.pos, state, state.withProperty(CONNECT, connected), 3);
+            }
+        }
     }
 
     public boolean isHead() {
