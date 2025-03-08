@@ -53,6 +53,10 @@ tasks.injectTags.configure {
 
 repositories {
     maven {
+        name = 'blamejared'
+        url = 'https://maven.blamejared.com'
+    }
+    maven {
         name = 'CurseMaven'
         url = 'https://cursemaven.com'
         content {
@@ -63,6 +67,9 @@ repositories {
 }
 
 dependencies {
+
+    implementation "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.698"
+
     implementation rfg.deobf("curse.maven:theoneprobe-245211:2667280")
     implementation rfg.deobf("curse.maven:ae2extendedlife-570458:5411078")
     implementation rfg.deobf("curse.maven:hadenoughitems-557549:5229422")

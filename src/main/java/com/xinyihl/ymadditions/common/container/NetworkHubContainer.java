@@ -3,6 +3,7 @@ package com.xinyihl.ymadditions.common.container;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
 import com.xinyihl.ymadditions.common.api.IInputHandler;
+import com.xinyihl.ymadditions.common.api.data.BlockPosDim;
 import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
@@ -65,7 +66,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
             }
             case 1: { // 创建网络
                 String name = compound.getString("name");
-                NetworkStatus network = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, networkHub.getWorld().provider.getDimension(), networkHub.getPos()));
+                NetworkStatus network = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, new BlockPosDim(networkHub.getPos(), networkHub.getWorld().provider.getDimension()) ));
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();

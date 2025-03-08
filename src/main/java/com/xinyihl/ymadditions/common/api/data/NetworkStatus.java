@@ -4,7 +4,6 @@ import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
@@ -15,7 +14,7 @@ import java.util.UUID;
 
 public class NetworkStatus {
     @Nonnull
-    private final List<BlockPos> targetPos = new ArrayList<>();
+    private final List<BlockPosDim> targetPos = new ArrayList<>();
     @Nonnull
     private UUID uuid = new UUID(0, 0);
     @Nonnull
@@ -24,20 +23,18 @@ public class NetworkStatus {
     private String networkName = "Unknown";
     private boolean needTellClient = false;
     private boolean isPublic = false;
-    private int dimensionId = 0;
     private int surplusChannels = 0;
     @Nonnull
-    private BlockPos pos = new BlockPos(0, 0, 0);
+    private BlockPosDim pos = new BlockPosDim(0, 0, 0, 0);
 
     private NetworkStatus() {
     }
 
-    public NetworkStatus(@Nonnull UUID owner, @Nonnull String networkName, boolean isPublic, int dimensionId, @Nonnull BlockPos pos) {
+    public NetworkStatus(@Nonnull UUID owner, @Nonnull String networkName, boolean isPublic, @Nonnull BlockPosDim pos) {
         this.uuid = UUID.randomUUID();
         this.owner = owner;
         this.networkName = networkName;
         this.isPublic = isPublic;
-        this.dimensionId = dimensionId;
         this.pos = pos;
     }
 
@@ -47,14 +44,13 @@ public class NetworkStatus {
         networkStatus.owner = Objects.requireNonNull(tag.getUniqueId("o"));
         networkStatus.networkName = tag.getString("n");
         networkStatus.isPublic = tag.getBoolean("i");
-        networkStatus.dimensionId = tag.getInteger("d");
-        networkStatus.pos = BlockPos.fromLong(tag.getLong("p"));
+        networkStatus.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         networkStatus.surplusChannels = tag.getInteger("sc");
 
         NBTTagList list = tag.getTagList("tp", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound nbt = list.getCompoundTagAt(i);
-            networkStatus.addTargetPos(BlockPos.fromLong(nbt.getLong("t")));
+            networkStatus.addTargetPos(BlockPosDim.readFromNBT(nbt.getCompoundTag("t")));
         }
         return networkStatus;
     }
@@ -68,7 +64,7 @@ public class NetworkStatus {
         NBTTagList list = tag.getTagList("tp", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound nbt = list.getCompoundTagAt(i);
-            this.addTargetPos(BlockPos.fromLong(nbt.getLong("t")));
+            this.addTargetPos(BlockPosDim.readFromNBT(nbt.getCompoundTag("t")));
         }
     }
 
@@ -77,13 +73,12 @@ public class NetworkStatus {
         tag.setUniqueId("o", this.owner);
         tag.setString("n", this.networkName);
         tag.setBoolean("i", this.isPublic);
-        tag.setInteger("d", this.dimensionId);
-        tag.setLong("p", this.pos.toLong());
+        tag.setTag("p", this.pos.writeToNBT(new NBTTagCompound()));
         tag.setInteger("sc", this.surplusChannels);
         NBTTagList list = new NBTTagList();
-        for (BlockPos pos : targetPos) {
+        for (BlockPosDim pos : targetPos) {
             NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setLong("t", pos.toLong());
+            nbt.setTag("t", pos.writeToNBT(new NBTTagCompound()));
             list.appendTag(nbt);
         }
         tag.setTag("tp", list);
@@ -108,25 +103,21 @@ public class NetworkStatus {
         isPublic = aPublic;
     }
 
-    public int getDimensionId() {
-        return dimensionId;
-    }
-
     @Nonnull
-    public BlockPos getPos() {
+    public BlockPosDim getPos() {
         return pos;
     }
 
     @Nonnull
-    public List<BlockPos> getTargetPos() {
+    public List<BlockPosDim> getTargetPos() {
         return targetPos;
     }
 
-    public void addTargetPos(@Nonnull BlockPos pos) {
+    public void addTargetPos(@Nonnull BlockPosDim pos) {
         targetPos.add(pos);
     }
 
-    public void removeTargetPos(@Nonnull BlockPos pos) {
+    public void removeTargetPos(@Nonnull BlockPosDim pos) {
         targetPos.remove(pos);
     }
 
@@ -152,7 +143,7 @@ public class NetworkStatus {
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetPos, uuid, owner, networkName, isPublic, dimensionId, surplusChannels, pos);
+        return Objects.hash(targetPos, uuid, owner, networkName, isPublic, surplusChannels, pos);
     }
 
     @Override
@@ -162,7 +153,6 @@ public class NetworkStatus {
                 ", owner=" + owner +
                 ", networkName='" + networkName + '\'' +
                 ", isPublic=" + isPublic +
-                ", dimensionId=" + dimensionId +
                 ", pos=" + pos +
                 '}';
     }

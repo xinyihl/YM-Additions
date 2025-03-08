@@ -2,6 +2,7 @@ package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
+import com.xinyihl.ymadditions.common.api.data.BlockPosDim;
 import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
@@ -16,7 +17,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -61,7 +61,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
     }
 
     private NetworkStatus showInfo() {
-        return networkHubContainer.networks.getOrDefault(networkHubContainer.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, 0, new BlockPos(0, 0, 0)));
+        return networkHubContainer.networks.getOrDefault(networkHubContainer.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
     }
 
     public List<Rectangle> getExtraAreas() {
@@ -196,7 +196,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.fontRenderer.drawString(I18n.format("tile.ymadditions.network_hub.name"), 7, 5, 0xFF404040);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.showInfo().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.showInfo().getSurplusChannels(), rightPanelX, rightPanelY + 15, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.showInfo().getDimensionId(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.showInfo().getPos().getDimension(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.showInfo().isPublic()), rightPanelX, rightPanelY + 45, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + networkHubContainer.networkHub.isConnected()), rightPanelX, rightPanelY + 60, 0xFFFFFF);
     }
