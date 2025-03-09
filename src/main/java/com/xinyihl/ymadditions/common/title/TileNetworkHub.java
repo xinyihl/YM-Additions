@@ -89,7 +89,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                         int dy = this.getPos().getY() - pos.getY();
                         int dz = this.getPos().getZ() - pos.getZ();
                         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                        power += NetHubPowerUsage.netHubPowerUsage.apply(dist, pos.getDimension() == this.world.provider.getDimension());
+                        power += NetHubPowerUsage.netHubPowerUsage.apply(dist, pos.getDimension() != this.world.provider.getDimension());
                     }
                     this.getProxy().setIdlePowerUsage(power);
 
@@ -162,7 +162,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         int dy = this.getPos().getY() - that.getPos().getY();
         int dz = this.getPos().getZ() - that.getPos().getZ();
         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        double power = NetHubPowerUsage.netHubPowerUsage.apply(dist, thatWorld.provider.getDimension() == this.world.provider.getDimension());
+        double power = NetHubPowerUsage.netHubPowerUsage.apply(dist, thatWorld.provider.getDimension() != this.world.provider.getDimension());
         try {
             this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
             this.setConnected(true);

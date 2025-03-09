@@ -9,7 +9,7 @@ import stanhebben.zenscript.annotations.ZenMethod;
 @ZenRegister
 @ZenClass("mods.ymadditions.NetHubPowerUsage")
 public class NetHubPowerUsage {
-    public static NetworkHubPowerUsage netHubPowerUsage  = (context, isOtherDim) -> (Configurations.GENERAL_CONFIG.powerBase + Configurations.GENERAL_CONFIG.powerDistanceMultiplier * context * Math.log(context * context + 3)) * (isOtherDim ? Configurations.GENERAL_CONFIG.otherBimMultiplier : 0);
+    public static NetworkHubPowerUsage netHubPowerUsage  = (context, isOtherDim) -> (Configurations.GENERAL_CONFIG.powerBase + Configurations.GENERAL_CONFIG.powerDistanceMultiplier * context * Math.log(context * context + 3)) * (isOtherDim ? Configurations.GENERAL_CONFIG.otherDimMultiplier : 0);
 
     @ZenMethod
     public static void calcNetHubPowerUsage(NetworkHubPowerUsage fun) {
