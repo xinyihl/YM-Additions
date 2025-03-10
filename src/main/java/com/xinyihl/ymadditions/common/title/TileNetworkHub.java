@@ -83,34 +83,35 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                     return;
                 }
                 if (this.isHead) {
-                    double power = 0.0D;
-                    for (BlockPosDim pos : network.getTargetPos()) {
-                        int dx = this.getPos().getX() - pos.getX();
-                        int dy = this.getPos().getY() - pos.getY();
-                        int dz = this.getPos().getZ() - pos.getZ();
-                        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                        power += NetHubPowerUsage.netHubPowerUsage.apply(dist, pos.getDimension() != this.world.provider.getDimension());
-                    }
-                    this.getProxy().setIdlePowerUsage(power);
+                    if(this.isConnected){
+                        double power = 0.0D;
+                        for (BlockPosDim pos : network.getTargetPos()) {
+                            int dx = this.getPos().getX() - pos.getX();
+                            int dy = this.getPos().getY() - pos.getY();
+                            int dz = this.getPos().getZ() - pos.getZ();
+                            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                            power += NetHubPowerUsage.netHubPowerUsage.apply(dist, pos.getDimension() != this.world.provider.getDimension());
+                        }
+                        this.getProxy().setIdlePowerUsage(power);
 
-                    int howMany = 0;
-                    for(IGridConnection gc : this.getActionableNode().getConnections()) {
-                        howMany = Math.max(gc.getUsedChannels(), howMany);
+                        int howMany = 0;
+                        for(IGridConnection gc : this.getActionableNode().getConnections()) {
+                            howMany = Math.max(gc.getUsedChannels(), howMany);
+                        }
+                        int surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
+                        if (this.lastSurplusChannels != surplusChannels) {
+                            this.lastSurplusChannels = surplusChannels;
+                            network.setSurplusChannels(surplusChannels);
+                            network.setNeedTellClient(true);
+                        }
+                        this.setConnected(!network.getTargetPos().isEmpty());
                     }
-                    int surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
-                    if (this.lastSurplusChannels != surplusChannels) {
-                        this.lastSurplusChannels = surplusChannels;
-                        network.setSurplusChannels(surplusChannels);
-                        network.setNeedTellClient(true);
-                    }
-                    this.setConnected(!network.getTargetPos().isEmpty());
                 } else {
                     if (this.getPos().equals(network.getPos())) {
                         this.setHead(true);
                     } else {
                         if (!this.isConnected) {
                             this.setupConnection(network);
-                            return;
                         }
                     }
                 }
@@ -166,12 +167,12 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         try {
             this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
             this.setConnected(true);
+            that.setConnected(true);
             this.getProxy().setIdlePowerUsage(power);
             network.addTargetPos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
         } catch (FailedConnectionException e) {
             this.unsetAll();
         }
-        this.sync();
     }
 
     public void breakConnection() {
@@ -226,10 +227,12 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     public void setConnected(boolean connected) {
         if (connected != this.isConnected) {
             this.isConnected = connected;
-            IBlockState state = this.world.getBlockState(this.getPos());
-            if(state.getBlock() == BlocksAndItems.blockNetworkHub) {
-                this.markDirty();
-                this.world.notifyBlockUpdate(this.pos, state, state.withProperty(CONNECT, connected), 3);
+            if(this.world.isBlockLoaded(this.getPos())) {
+                IBlockState state = this.world.getBlockState(this.getPos());
+                if(state.getBlock() == BlocksAndItems.blockNetworkHub) {
+                    this.markDirty();
+                    this.world.notifyBlockUpdate(this.pos, state, state.withProperty(CONNECT, connected), 3);
+                }
             }
         }
     }
