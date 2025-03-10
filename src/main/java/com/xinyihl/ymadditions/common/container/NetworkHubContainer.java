@@ -67,6 +67,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
             case 1: { // 创建网络
                 String name = compound.getString("name");
                 NetworkStatus network = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, new BlockPosDim(networkHub.getPos(), networkHub.getWorld().provider.getDimension()) ));
+                network.setNeedTellClient(true);
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();
