@@ -10,7 +10,7 @@ public class Configurations {
 
     public static class GeneralConfig {
         @Config.Comment("ME无线收发器是否可以跨维度（修改会导致原网络丢失）")
-        public boolean canRDimension = false;
+        public boolean canRDimension = true;
         @Config.Comment("节点能量消耗 = (powerBase + powerDistanceMultiplier * Distance * ln(Distance^2 + 3)) * otherDimMultiplier (AE/t)\n主节点为全部连接相加\n\n基础耗电量")
         public double powerBase = 1D;
         @Config.Comment("耗电乘数")
