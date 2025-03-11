@@ -3,29 +3,28 @@ package com.xinyihl.ymadditions.common.api.data;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class NetworkStatus {
-    @Nonnull
-    private final List<BlockPosDim> targetPos = new ArrayList<>();
     @Nonnull
     private UUID uuid = new UUID(0, 0);
     @Nonnull
     private UUID owner = new UUID(0, 0);
     @Nonnull
     private String networkName = "Unknown";
-    private boolean needTellClient = false;
     private boolean isPublic = false;
     private int surplusChannels = 0;
     @Nonnull
     private BlockPosDim pos = new BlockPosDim(0, 0, 0, 0);
+
+    @Nonnull
+    private final Set<BlockPosDim> targetPos = new HashSet<>();
+    private boolean needTellClient = false;
 
     private NetworkStatus() {
     }
@@ -46,12 +45,6 @@ public class NetworkStatus {
         networkStatus.isPublic = tag.getBoolean("i");
         networkStatus.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         networkStatus.surplusChannels = tag.getInteger("sc");
-
-        NBTTagList list = tag.getTagList("tp", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            networkStatus.addTargetPos(BlockPosDim.readFromNBT(nbt.getCompoundTag("t")));
-        }
         return networkStatus;
     }
 
@@ -59,13 +52,6 @@ public class NetworkStatus {
         this.networkName = tag.getString("n");
         this.isPublic = tag.getBoolean("i");
         this.surplusChannels = tag.getInteger("sc");
-
-        this.targetPos.clear();
-        NBTTagList list = tag.getTagList("tp", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            this.addTargetPos(BlockPosDim.readFromNBT(nbt.getCompoundTag("t")));
-        }
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
@@ -75,13 +61,6 @@ public class NetworkStatus {
         tag.setBoolean("i", this.isPublic);
         tag.setTag("p", this.pos.writeToNBT(new NBTTagCompound()));
         tag.setInteger("sc", this.surplusChannels);
-        NBTTagList list = new NBTTagList();
-        for (BlockPosDim pos : targetPos) {
-            NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setTag("t", pos.writeToNBT(new NBTTagCompound()));
-            list.appendTag(nbt);
-        }
-        tag.setTag("tp", list);
         return tag;
     }
 
@@ -109,7 +88,7 @@ public class NetworkStatus {
     }
 
     @Nonnull
-    public List<BlockPosDim> getTargetPos() {
+    public Set<BlockPosDim> getTargetPos() {
         return targetPos;
     }
 
@@ -143,7 +122,7 @@ public class NetworkStatus {
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetPos, uuid, owner, networkName, isPublic, surplusChannels, pos);
+        return uuid.hashCode();
     }
 
     @Override

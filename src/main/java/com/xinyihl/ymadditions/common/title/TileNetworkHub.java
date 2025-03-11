@@ -188,7 +188,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                 World thatWorld = DimensionManager.getWorld(pos.getDimension());
                 TileEntity tile = thatWorld.getTileEntity(new BlockPos(pos));
                 if (tile instanceof TileNetworkHub) {
-                    ((TileNetworkHub) tile).unsetAll();
+                    ((TileNetworkHub) tile).breakConnection();
                 }
             }
             storage.removeNetwork(this.networkUuid);
@@ -212,6 +212,19 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         }
         this.getProxy().setIdlePowerUsage(100.0D);
         this.sync();
+    }
+
+    @Override
+    public void onChunkUnload() {
+        super.onChunkUnload();
+        NetworkHubDataStorage storage = NetworkHubDataStorage.get(this.world);
+        NetworkStatus network = storage.getNetwork(this.networkUuid);
+        if (network == null) {
+            this.unsetAll();
+            return;
+        }
+        network.removeTargetPos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
+        storage.markDirty();
     }
 
     @Override
