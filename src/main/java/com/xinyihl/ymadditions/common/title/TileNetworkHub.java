@@ -45,7 +45,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
 
     public TileNetworkHub() {
         super();
-        this.proxy.setFlags(GridFlags.DENSE_CAPACITY);
+        this.proxy.setFlags(GridFlags.DENSE_CAPACITY, GridFlags.PREFERRED);
     }
 
     @Override
