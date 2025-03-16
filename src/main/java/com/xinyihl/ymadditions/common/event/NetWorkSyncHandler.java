@@ -30,10 +30,19 @@ import static com.xinyihl.ymadditions.common.network.PacketServerToClient.Server
 public class NetWorkSyncHandler {
 
     @SubscribeEvent
-    public static void onPlayerJoinWorld(PlayerEvent.PlayerLoggedInEvent event){
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event){
         if(event.player.world.isRemote) return;
-        World world = event.player.world;
-        EntityPlayerMP player = (EntityPlayerMP) event.player;
+        initSyncDate((EntityPlayerMP) event.player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event){
+        if(event.player.world.isRemote) return;
+        initSyncDate((EntityPlayerMP) event.player);
+    }
+
+    private static void initSyncDate(EntityPlayerMP player){
+        World world = player.world;
         NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
         List<NetworkStatus> networks = storage.getPlayerNetworks(player);
         if (!networks.isEmpty()) {

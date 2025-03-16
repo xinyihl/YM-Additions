@@ -44,6 +44,7 @@ public class BlockNetworkHub extends Block {
         this.setDefaultState(this.blockState.getBaseState().withProperty(CONNECT, false));
     }
 
+    @Nonnull
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(CONNECT, meta == 1);
@@ -110,5 +111,18 @@ public class BlockNetworkHub extends Block {
     @Override
     public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState iBlockState) {
         return new TileNetworkHub();
+    }
+
+    @Override
+    public void breakBlock(World world,@Nonnull BlockPos pos,@Nonnull IBlockState state)
+    {
+        if (!world.isRemote) {
+            TileEntity te = world.getTileEntity(pos);
+            if (te instanceof TileNetworkHub) {
+                TileNetworkHub tn = (TileNetworkHub) te;
+                tn.breakConnection();
+            }
+        }
+        super.breakBlock(world, pos, state);
     }
 }

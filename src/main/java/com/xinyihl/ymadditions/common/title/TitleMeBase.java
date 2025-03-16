@@ -84,6 +84,7 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
                     player.connection.sendPacket(packet);
                 }
             }
+            this.markDirty();
         }
     }
 

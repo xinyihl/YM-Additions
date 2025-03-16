@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -184,7 +185,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             return;
         }
         if (this.isHead) {
-            for (BlockPosDim pos : network.getTargetPos()) {
+            for (BlockPosDim pos : new HashSet<>(network.getTargetPos())) {
                 World thatWorld = DimensionManager.getWorld(pos.getDimension());
                 TileEntity tile = thatWorld.getTileEntity(new BlockPos(pos));
                 if (tile instanceof TileNetworkHub) {
@@ -225,12 +226,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         }
         network.removeTargetPos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
         storage.markDirty();
-    }
-
-    @Override
-    public void invalidate() {
-        super.invalidate();
-        this.breakConnection();
     }
 
     public boolean isConnected() {
