@@ -48,7 +48,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
     private GuiButton connectButton;
     private GuiButton disConnectButton;
     private final NetworkHubContainer networkHubContainer;
-    private int oldNetworksHash;
+    private int oldNetworksSize;
 
     private GuiTextField textField;
     private boolean isCreating = false;
@@ -104,9 +104,9 @@ public class NetworkHubGuiContainer extends GuiContainer {
     }
 
     private boolean isButUpdate() {
-        int newNetworksHash = this.networkHubContainer.networks.hashCode();
-        if (this.oldNetworksHash != newNetworksHash) {
-            this.oldNetworksHash = newNetworksHash;
+        int oldNetworksSize = this.networkHubContainer.networks.size();
+        if (this.oldNetworksSize != oldNetworksSize) {
+            this.oldNetworksSize = oldNetworksSize;
             return true;
         }
         return false;
