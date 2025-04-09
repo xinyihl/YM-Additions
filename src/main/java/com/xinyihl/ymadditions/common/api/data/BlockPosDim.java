@@ -36,6 +36,10 @@ public class BlockPosDim extends BlockPos {
         return dimension == that.dimension;
     }
 
+    public BlockPos toBlockPos() {
+        return new BlockPos(this);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), dimension);

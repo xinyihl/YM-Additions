@@ -26,7 +26,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -85,16 +87,23 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                 }
                 if (this.isHead) {
                     if(this.isConnected){
-                        double power = 0.0D;
-                        for (BlockPosDim pos : network.getTargetPos()) {
-                            int dx = this.getPos().getX() - pos.getX();
-                            int dy = this.getPos().getY() - pos.getY();
-                            int dz = this.getPos().getZ() - pos.getZ();
-                            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                            power += NetHubPowerUsage.netHubPowerUsage.apply(dist, pos.getDimension() != this.world.provider.getDimension());
+                        if (NetHubPowerUsage.useBaseA) {
+                            Map<Double, Boolean> mapDist = new HashMap<>();
+                            for (BlockPosDim pos : network.getTargetPos()) {
+                                int dx = this.getPos().getX() - pos.getX();
+                                int dy = this.getPos().getY() - pos.getY();
+                                int dz = this.getPos().getZ() - pos.getZ();
+                                double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                                mapDist.put(dist, pos.getDimension() != this.world.provider.getDimension());
+                            }
+                            this.getProxy().setIdlePowerUsage(NetHubPowerUsage.netHubBasePowerUsageA.apply(mapDist));
+                        } else {
+                            Map<BlockPos, Boolean> mapDist = new HashMap<>();
+                            for (BlockPosDim pos : network.getTargetPos()) {
+                                mapDist.put(pos.toBlockPos(), pos.getDimension() != this.world.provider.getDimension());
+                            }
+                            this.getProxy().setIdlePowerUsage(NetHubPowerUsage.netHubBasePowerUsageB.apply(this.getPos(), mapDist));
                         }
-                        this.getProxy().setIdlePowerUsage(power);
-
                         int howMany = 0;
                         for(IGridConnection gc : this.getActionableNode().getConnections()) {
                             howMany = Math.max(gc.getUsedChannels(), howMany);
@@ -108,7 +117,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                         this.setConnected(!network.getTargetPos().isEmpty());
                     }
                 } else {
-                    if (this.getPos().equals(network.getPos())) {
+                    if (this.getPos().equals(network.getPos().toBlockPos())) {
                         this.setHead(true);
                     } else {
                         if (!this.isConnected) {
@@ -154,17 +163,23 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         if (this.world.isRemote) return;
         BlockPosDim pos = network.getPos();
         World thatWorld = DimensionManager.getWorld(pos.getDimension());
-        TileEntity tile = thatWorld.getTileEntity(new BlockPos(pos));
+        TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
         if (!(tile instanceof TileNetworkHub)) {
             NetworkHubDataStorage.get(thatWorld).removeNetwork(this.networkUuid);
             return;
         }
         TileNetworkHub that = (TileNetworkHub) tile;
-        int dx = this.getPos().getX() - that.getPos().getX();
-        int dy = this.getPos().getY() - that.getPos().getY();
-        int dz = this.getPos().getZ() - that.getPos().getZ();
-        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        double power = NetHubPowerUsage.netHubPowerUsage.apply(dist, thatWorld.provider.getDimension() != this.world.provider.getDimension());
+        double power = 0;
+        if (NetHubPowerUsage.useA) {
+            int dx = this.getPos().getX() - that.getPos().getX();
+            int dy = this.getPos().getY() - that.getPos().getY();
+            int dz = this.getPos().getZ() - that.getPos().getZ();
+            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            power = NetHubPowerUsage.netHubPowerUsageA.apply(dist, thatWorld.provider.getDimension() != this.world.provider.getDimension());
+        } else {
+            power = NetHubPowerUsage.netHubPowerUsageB.apply(this.getPos(), that.getPos(), thatWorld.provider.getDimension() != this.world.provider.getDimension());
+        }
+
         try {
             this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
             this.setConnected(true);
@@ -187,7 +202,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         if (this.isHead) {
             for (BlockPosDim pos : new HashSet<>(network.getTargetPos())) {
                 World thatWorld = DimensionManager.getWorld(pos.getDimension());
-                TileEntity tile = thatWorld.getTileEntity(new BlockPos(pos));
+                TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
                 if (tile instanceof TileNetworkHub) {
                     ((TileNetworkHub) tile).breakConnection();
                 }
