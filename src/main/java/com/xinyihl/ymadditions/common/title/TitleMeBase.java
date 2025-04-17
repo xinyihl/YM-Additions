@@ -9,6 +9,7 @@ import appeng.api.util.DimensionalCoord;
 import appeng.me.helpers.AENetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.me.helpers.MachineSource;
+import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -33,7 +34,7 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
 
     public TitleMeBase() {
         this.source = new MachineSource(this);
-        this.proxy.setIdlePowerUsage(100.0D);
+        this.proxy.setIdlePowerUsage(Configurations.GENERAL_CONFIG.powerBase);
         //this.proxy.setFlags(GridFlags.REQUIRE_CHANNEL);
     }
 
