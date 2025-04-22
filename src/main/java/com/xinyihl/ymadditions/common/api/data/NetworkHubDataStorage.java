@@ -1,6 +1,5 @@
 package com.xinyihl.ymadditions.common.api.data;
 
-import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.Tags;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,23 +18,13 @@ import java.util.stream.Collectors;
 
 public class NetworkHubDataStorage extends WorldSavedData {
     private static final String DATA_NAME = Tags.MOD_ID + "_NHDS";
-    private static final String DATA_NAME_DIM = Tags.MOD_ID + "_NHDS_DIM";
     private final Map<UUID, NetworkStatus> networks = new LinkedHashMap<>();
 
     public NetworkHubDataStorage(String name) {
         super(name);
     }
 
-    public static NetworkHubDataStorage getDim(World world) {
-        NetworkHubDataStorage data = (NetworkHubDataStorage) world.getPerWorldStorage().getOrLoadData(NetworkHubDataStorage.class, DATA_NAME_DIM);
-        if (data == null) {
-            data = new NetworkHubDataStorage(DATA_NAME_DIM);
-            world.getPerWorldStorage().setData(DATA_NAME_DIM, data);
-        }
-        return data;
-    }
-
-    public static NetworkHubDataStorage getGlobal(World world) {
+    public static NetworkHubDataStorage get(World world) {
         NetworkHubDataStorage data = null;
         if (world.getMapStorage() != null) {
             data = (NetworkHubDataStorage) world.getMapStorage().getOrLoadData(NetworkHubDataStorage.class, DATA_NAME);
@@ -47,14 +36,6 @@ public class NetworkHubDataStorage extends WorldSavedData {
             }
         }
         return data;
-    }
-
-    public static NetworkHubDataStorage get(World world) {
-        if (Configurations.GENERAL_CONFIG.canRDimension) {
-            return getGlobal(world);
-        } else {
-            return getDim(world);
-        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.xinyihl.ymadditions.common.api.data;
 
+import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -100,13 +101,23 @@ public class NetworkStatus {
         targetPos.remove(pos);
     }
 
+    private boolean checkDimension(int dimension) {
+        return Configurations.GENERAL_CONFIG.canRDimension || dimension == this.pos.getDimension();
+    }
+
+    /**
+     * @param player
+     * @param level 0(op, 公开, 拥有者) 1(op，拥有者) 2(拥有者)
+     * @return 是否有权限操作以及维度判断
+     */
     public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
         //todo 权限系统
         boolean isOp = Utils.isPlayerOp(player);
+        if (!this.checkDimension(player.world.provider.getDimension())) return false;
         switch (level) {
             case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner);
             case 1: return isOp || player.getGameProfile().getId().equals(this.owner);
-            //case 2: return player.getGameProfile().getId().equals(this.owner);
+            case 2: return player.getGameProfile().getId().equals(this.owner);
             default: return false;
         }
     }

@@ -9,7 +9,7 @@ public class Configurations {
     public static final GeneralConfig GENERAL_CONFIG = new GeneralConfig();
 
     public static class GeneralConfig {
-        @Config.Comment("Can ME wireless transceivers be cross-dimensional (modifications result in loss of original network)\nME无线收发器是否可以跨维度（修改会导致原网络丢失）")
+        @Config.Comment("Can ME wireless transceivers be cross-dimensional\nME无线收发器是否可以跨维度")
         public boolean canRDimension = true;
         @Config.Comment("Nodal energy consumption = (powerBase + powerDistanceMultiplier * Distance * ln(Distance^2 + 3)) * otherDimMultiplier (AE/t)\nThe master node is the sum of all connections\n主节点为全部连接相加")
         public double powerBase = 1D;
