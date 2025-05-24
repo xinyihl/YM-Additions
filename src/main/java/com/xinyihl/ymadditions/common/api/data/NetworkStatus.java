@@ -4,18 +4,19 @@ import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class NetworkStatus {
     @Nonnull
     private UUID uuid = new UUID(0, 0);
     @Nonnull
     private UUID owner = new UUID(0, 0);
+    @Nonnull
+    private final List<UUID> users = new ArrayList<>();
     @Nonnull
     private String networkName = "Unknown";
     private boolean isPublic = false;
@@ -46,6 +47,11 @@ public class NetworkStatus {
         networkStatus.isPublic = tag.getBoolean("i");
         networkStatus.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         networkStatus.surplusChannels = tag.getInteger("sc");
+        NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound nbt = list.getCompoundTagAt(i);
+            networkStatus.users.add(nbt.getUniqueId("u"));
+        }
         return networkStatus;
     }
 
@@ -62,6 +68,13 @@ public class NetworkStatus {
         tag.setBoolean("i", this.isPublic);
         tag.setTag("p", this.pos.writeToNBT(new NBTTagCompound()));
         tag.setInteger("sc", this.surplusChannels);
+        NBTTagList list = new NBTTagList();
+        for (UUID uuid : this.users) {
+            NBTTagCompound nbt = new NBTTagCompound();
+            nbt.setUniqueId("u", uuid);
+            list.appendTag(nbt);
+        }
+        tag.setTag("us", list);
         return tag;
     }
 
@@ -93,6 +106,18 @@ public class NetworkStatus {
         return targetPos;
     }
 
+    public List<UUID> getUsers() {
+        return users;
+    }
+
+    public void removeUser(UUID uuid) {
+        this.users.remove(uuid);
+    }
+
+    public void addUser(UUID uuid) {
+        this.users.add(uuid);
+    }
+
     public void addTargetPos(@Nonnull BlockPosDim pos) {
         targetPos.add(pos);
     }
@@ -106,18 +131,19 @@ public class NetworkStatus {
     }
 
     /**
-     * @param player
-     * @param level 0(op, 公开, 拥有者) 1(op，拥有者) 2(拥有者)
+     * @param player 待检测玩家
+     * @param level 0(op, 公开, 拥有者, 成员) 1(op, 拥有者, 成员) 2(op, 拥有者)
      * @return 是否有权限操作以及维度判断
      */
     public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
         //todo 权限系统
         boolean isOp = Utils.isPlayerOp(player);
+        boolean isUser = this.users.contains(player.getGameProfile().getId());
         if (!this.checkDimension(player.world.provider.getDimension())) return false;
         switch (level) {
-            case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner);
-            case 1: return isOp || player.getGameProfile().getId().equals(this.owner);
-            case 2: return player.getGameProfile().getId().equals(this.owner);
+            case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner) || isUser;
+            case 1: return isOp || player.getGameProfile().getId().equals(this.owner) || isUser;
+            case 2: return isOp || player.getGameProfile().getId().equals(this.owner);
             default: return false;
         }
     }
