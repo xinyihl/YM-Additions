@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,7 +40,7 @@ public class YMCommand extends CommandBase {
     @Override
     public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, String[] args) throws CommandException {
         if (args.length < 1) {
-            throw new CommandException("缺少参数，用法: " + getUsage(sender));
+            throw new CommandException("commands.ym.error.no_args");
         }
 
         switch (args[0].toLowerCase()) {
@@ -53,57 +54,57 @@ public class YMCommand extends CommandBase {
                 handleList(server, sender, args);
                 break;
             default:
-                throw new CommandException("未知子命令，可用命令：add/rm/list");
+                throw new CommandException("commands.ym.error.unknown");
         }
     }
 
     private void handleAdd(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         checkPermission(server, sender);
         if (args.length != 3) {
-            throw new CommandException("参数错误，正确用法: /ym add <networkUUID> <player>");
+            throw new CommandException("commands.ym.error.args");
         }
 
         UUID network = UUID.fromString(args[1]);
         GameProfile player = server.getPlayerProfileCache().getGameProfileForUsername(args[2]);
 
         if (player == null) {
-            throw new CommandException("玩家不存在");
+            throw new CommandException("commands.ym.error.player_no_found");
         }
 
         NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
 
         if (networkStatus == null) {
-            throw new CommandException("未找到网络");
+            throw new CommandException("commands.ym.error.unknown_network");
         }
 
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
             networkStatus.addUser(player.getId());
             networkStatus.setNeedTellClient(true);
-            sender.sendMessage(new TextComponentString("已添加玩家 " + args[2] + " 到网络 " + network));
+            sender.sendMessage(new TextComponentTranslation("commands.ym.info.add_success"));
         } else {
-            throw new CommandException("您没有该网络的权限");
+            throw new CommandException("commands.ym.error.no_perm_network");
         }
     }
 
     private void handleRemove(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         checkPermission(server, sender);
         if (args.length != 3) {
-            throw new CommandException("参数错误，正确用法: /ym rm <networkUUID> <player>");
+            throw new CommandException("commands.ym.error.args");
         }
 
         UUID network = UUID.fromString(args[1]);
         GameProfile player = server.getPlayerProfileCache().getGameProfileForUsername(args[2]);
 
         if (player == null) {
-            throw new CommandException("玩家不存在");
+            throw new CommandException("commands.ym.error.player_no_found");
         }
 
         NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
 
         if (networkStatus == null) {
-            throw new CommandException("未找到网络");
+            throw new CommandException("commands.ym.error.unknown_network");
         }
 
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
@@ -114,28 +115,28 @@ public class YMCommand extends CommandBase {
                 tag.setUniqueId("networkUuid", network);
                 YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(DELETE_NETWORK, tag), p);
             }
-            sender.sendMessage(new TextComponentString("已从网络 " + network + " 移除玩家 " + args[2]));
+            sender.sendMessage(new TextComponentTranslation("commands.ym.info.remove_success"));
         } else {
-            throw new CommandException("您没有该网络的权限");
+            throw new CommandException("commands.ym.error.no_perm_network");
         }
     }
 
     private void handleList(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         checkPermission(server, sender);
         if (args.length != 2) {
-            throw new CommandException("参数错误，正确用法: /ym list <networkUUID>");
+            throw new CommandException("commands.ym.error.args");
         }
         UUID network = UUID.fromString(args[1]);
         NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
         if (networkStatus == null) {
-            throw new CommandException("未找到网络");
+            throw new CommandException("commands.ym.error.unknown_network");
         }
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
             sender.sendMessage(new TextComponentString("Users:"));
             networkStatus.getUsers().forEach(user -> sender.sendMessage(new TextComponentString(server.getPlayerProfileCache().getProfileByUUID(user).getName())));
         } else {
-            throw new CommandException("您没有该网络的权限");
+            throw new CommandException("commands.ym.error.no_perm_network");
         }
     }
 

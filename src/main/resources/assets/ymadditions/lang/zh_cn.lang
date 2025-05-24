@@ -23,3 +23,12 @@ gui.ymadditions.network_hub.info.public.true=是否公开: 是
 gui.ymadditions.network_hub.info.public.false=是否公开: 否
 gui.ymadditions.network_hub.info.state.true=连接状态: 已连接
 gui.ymadditions.network_hub.info.state.false=连接状态: 未连接
+
+commands.ym.error.player_no_found=玩家不存在
+commands.ym.error.no_args=缺少参数
+commands.ym.error.unknown=未知子命令，可用命令：add/rm/list
+commands.ym.error.args=参数错误
+commands.ym.error.unknown_network=未找到网络
+commands.ym.error.no_perm_network=您没有该网络的权限
+commands.ym.info.remove_success=成功移除玩家
+commands.ym.info.add_success=成功添加玩家

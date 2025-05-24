@@ -23,3 +23,12 @@ gui.ymadditions.network_hub.info.public.true=Public: Yes
 gui.ymadditions.network_hub.info.public.false=Public: No
 gui.ymadditions.network_hub.info.state.true=status: Connected
 gui.ymadditions.network_hub.info.state.false=status: Not connected
+
+commands.ym.error.player_no_found=Player not found
+commands.ym.error.no_args=Missing arguments
+commands.ym.error.unknown=Unknown subcommand. Available commands: add/rm/list
+commands.ym.error.args=Invalid arguments
+commands.ym.error.unknown_network=Network not found
+commands.ym.error.no_perm_network=You don't have permission for this network
+commands.ym.info.remove_success=Player successfully removed
+commands.ym.info.add_success=Player successfully added
