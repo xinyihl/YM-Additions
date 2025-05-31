@@ -187,6 +187,12 @@ public class NetworkHubGuiContainer extends GuiContainer {
         if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
             this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX, mouseY);
         }
+
+        for (NetButton btn : networkButtons) {
+            if (this.isMouseOverButton(btn, mouseX, mouseY)) {
+                this.drawHoveringText("UUID: " + btn.networkStatus.getUuid(), mouseX, mouseY);
+            }
+        }
     }
 
     @Override

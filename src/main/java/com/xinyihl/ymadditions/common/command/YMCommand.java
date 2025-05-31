@@ -144,11 +144,11 @@ public class YMCommand extends CommandBase {
     @Nonnull
     public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 1) {
-            return Arrays.asList("add", "rm", "list");
+            return getListOfStringsMatchingLastWord(args, Arrays.asList("add", "rm", "list"));
         } else if (args.length == 2 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]) || "list".equalsIgnoreCase(args[0]))) {
             NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
             List<NetworkStatus> networkStatusList = storage.getPlayerNetworks((EntityPlayer) sender);
-            return networkStatusList.stream().map(NetworkStatus::getUuid).map(UUID::toString).collect(Collectors.toList());
+            return getListOfStringsMatchingLastWord(args, networkStatusList.stream().map(NetworkStatus::getUuid).map(UUID::toString).collect(Collectors.toList()));
         }
         return super.getTabCompletions(server, sender, args, targetPos);
     }
