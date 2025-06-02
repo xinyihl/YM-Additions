@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
@@ -51,7 +52,10 @@ public class NetworkHubGuiContainer extends GuiContainer {
     private int oldNetworksSize;
 
     private GuiTextField textField;
+    private GuiTextField searchField;
     private boolean isCreating = false;
+    private static String searchNet = "";
+    private boolean updateNetButtons = false;
 
     public NetworkHubGuiContainer(NetworkHubContainer networkHubContainer) {
         super(networkHubContainer);
@@ -79,6 +83,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.disConnectButton = new GuiButton(998, guiLeft + 103, guiTop + 135, 70, 20, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
         this.lockButton       = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12);
         this.textField        = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 20);
+        this.searchField      = new GuiTextField(1001, this.fontRenderer, guiLeft + 110,guiTop + 4,   80, this.fontRenderer.FONT_HEIGHT);
 
         if (this.networkHubContainer.networkHub.isConnected()) {
             this.createButton.enabled = false;
@@ -91,8 +96,16 @@ public class NetworkHubGuiContainer extends GuiContainer {
         }
 
         this.lockButton.setLocked(!this.showInfo().isPublic());
+
         this.textField.setVisible(false);
         this.textField.setMaxStringLength(10);
+
+        this.searchField.setVisible(true);
+        this.searchField.setMaxStringLength(10);
+        this.searchField.setEnableBackgroundDrawing(false);
+        this.searchField.setTextColor(16777215);
+        this.searchField.setText(searchNet);
+        this.searchField.setFocused(false);
 
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);
@@ -109,13 +122,17 @@ public class NetworkHubGuiContainer extends GuiContainer {
             this.oldNetworksSize = oldNetworksSize;
             return true;
         }
+        if (updateNetButtons) {
+            this.updateNetButtons = false;
+            return true;
+        }
         return false;
     }
 
     private void updateNetworksButtons() {
         if (!this.isButUpdate() && scrollOffset == lastScrollOffset) return;
         this.networkButtons.clear();
-        List<NetworkStatus> networks = new ArrayList<>(networkHubContainer.networks.values());
+        List<NetworkStatus> networks = networkHubContainer.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).collect(Collectors.toList());
         for (int i = 0; i < 4; i++) {
             int index = scrollOffset / 20 + i;
             if (index >= networks.size()) break;
@@ -180,9 +197,8 @@ public class NetworkHubGuiContainer extends GuiContainer {
         drawRect(guiLeft + SCROLL_BAR_LEFT, guiTop + 15, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, guiTop + 21 + visibleHeight,      0xFF9c9c9c);
         drawRect(guiLeft + SCROLL_BAR_LEFT,       scrollBarY, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, scrollBarY + scrollBarHeight + 6, 0xFF373737);
 
-        if (isCreating) {
-            this.textField.drawTextBox();
-        }
+        this.textField.drawTextBox();
+        this.searchField.drawTextBox();
 
         if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
             this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX, mouseY);
@@ -255,17 +271,29 @@ public class NetworkHubGuiContainer extends GuiContainer {
                 YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
                 this.textField.setText("");
             }
-        } else {
-            super.keyTyped(typedChar, keyCode);
+            return;
         }
+        if (searchField.isFocused()) {
+            if(this.searchField.textboxKeyTyped(typedChar, keyCode)){
+                searchNet = this.searchField.getText();
+                this.updateNetButtons = true;
+            }
+            return;
+        }
+        super.keyTyped(typedChar, keyCode);
     }
 
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        int mouseWheel = Mouse.getEventDWheel();
-        if (mouseWheel != 0) {
-            this.scrollOffset = (int) MathHelper.clamp(scrollOffset - (Math.signum(mouseWheel) * 20), 0, maxScroll);
+        int x = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int y = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+        // guiLeft + 8, guiTop + 17, 110, visibleHeight + 3
+        if (x >= guiLeft + 8 && y >= guiTop + 17 && x < guiLeft + 8 + 95 && y < guiTop + 17 + 83){
+            int mouseWheel = Mouse.getEventDWheel();
+            if (mouseWheel != 0) {
+                this.scrollOffset = (int) MathHelper.clamp(scrollOffset - (Math.signum(mouseWheel) * 20), 0, maxScroll);
+            }
         }
     }
 
@@ -277,6 +305,11 @@ public class NetworkHubGuiContainer extends GuiContainer {
             this.isCreating = false;
             this.textField.setVisible(false);
             return;
+        }
+        if(isMouseOverTextField(this.searchField, mouseX, mouseY)){
+            this.searchField.setFocused(true);
+        } else {
+            this.searchField.setFocused(false);
         }
         for (NetButton btn : networkButtons) {
             if (btn.mousePressed(mc, mouseX, mouseY)) {
