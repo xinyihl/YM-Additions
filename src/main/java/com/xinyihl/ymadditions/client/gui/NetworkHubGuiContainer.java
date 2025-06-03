@@ -172,7 +172,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.disConnectButton.enabled = !isHead;
         this.connectButton.enabled = !isHead;
 
-        int listHeight = this.networkHubContainer.networks.size() * 20;
+        int listHeight = (int) this.networkHubContainer.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).count() * 20;
         int visibleHeight = 80;
         this.maxScroll = Math.max(0, listHeight - visibleHeight);
 
@@ -276,6 +276,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
         if (searchField.isFocused()) {
             if(this.searchField.textboxKeyTyped(typedChar, keyCode)){
                 searchNet = this.searchField.getText();
+                this.scrollOffset = 0;
                 this.updateNetButtons = true;
             }
             return;
@@ -306,11 +307,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
             this.textField.setVisible(false);
             return;
         }
-        if(isMouseOverTextField(this.searchField, mouseX, mouseY)){
-            this.searchField.setFocused(true);
-        } else {
-            this.searchField.setFocused(false);
-        }
+        this.searchField.setFocused(isMouseOverTextField(this.searchField, mouseX, mouseY));
         for (NetButton btn : networkButtons) {
             if (btn.mousePressed(mc, mouseX, mouseY)) {
                 btn.playPressSound(mc.getSoundHandler());
