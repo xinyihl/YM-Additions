@@ -1,4 +1,4 @@
-package com.xinyihl.ymadditions.common.api.data;
+package com.xinyihl.ymadditions.common.api;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;

@@ -1,4 +1,4 @@
-package com.xinyihl.ymadditions.common.api.data;
+package com.xinyihl.ymadditions.common.api;
 
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.utils.Utils;

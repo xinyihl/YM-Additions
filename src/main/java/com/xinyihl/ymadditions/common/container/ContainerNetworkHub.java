@@ -1,11 +1,11 @@
 package com.xinyihl.ymadditions.common.container;
 
 import com.xinyihl.ymadditions.YMAdditions;
+import com.xinyihl.ymadditions.common.api.BlockPosDim;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
 import com.xinyihl.ymadditions.common.api.IInputHandler;
-import com.xinyihl.ymadditions.common.api.data.BlockPosDim;
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,9 +17,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.*;
+import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORKS;
+import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.UPDATE_GUI_SELECTED_NETWORK;
 
-public class NetworkHubContainer extends Container implements IInputHandler, IContaierTickable {
+public class ContainerNetworkHub extends Container implements IInputHandler, IContaierTickable {
 
     public EntityPlayer player;
     public TileNetworkHub networkHub;
@@ -27,7 +28,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
     public UUID selectedNetwork;
     public NetworkHubDataStorage storage;
 
-    public NetworkHubContainer(EntityPlayer player, TileNetworkHub networkHub) {
+    public ContainerNetworkHub(EntityPlayer player, TileNetworkHub networkHub) {
         this.player = player;
         this.networkHub = networkHub;
         this.storage = NetworkHubDataStorage.get(networkHub.getWorld());
@@ -83,7 +84,7 @@ public class NetworkHubContainer extends Container implements IInputHandler, ICo
                     storage.removeNetwork(this.selectedNetwork);
                     NBTTagCompound tag = new NBTTagCompound();
                     tag.setUniqueId("networkUuid", this.selectedNetwork);
-                    YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORK, tag));
+                    YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORKS, tag));
                     this.selectedNetwork = new UUID(0, 0);
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);

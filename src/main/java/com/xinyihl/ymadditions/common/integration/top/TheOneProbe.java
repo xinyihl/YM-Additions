@@ -1,6 +1,5 @@
-package com.xinyihl.ymadditions.common.integration;
+package com.xinyihl.ymadditions.common.integration.top;
 
-import com.xinyihl.ymadditions.common.integration.top.TileTOPDataProvider;
 import mcjty.theoneprobe.api.ITheOneProbe;
 
 import java.util.function.Function;

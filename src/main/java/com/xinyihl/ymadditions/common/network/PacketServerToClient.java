@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.common.network;
 
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
+import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
@@ -47,18 +47,22 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
             World world = Minecraft.getMinecraft().world;
             NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
             switch (ServerToClient.valueOf(message.type)) {
+                case INIT_NETWORKS: {
+                    storage.readFromNBT(message.compound);
+                    break;
+                }
                 case UPDATE_NETWORKS: {
                     storage.updateFromNBT(message.compound);
                     break;
                 }
-                case DELETE_NETWORK: {
+                case DELETE_NETWORKS: {
                     storage.removeNetwork(message.compound.getUniqueId("networkUuid"));
                     break;
                 }
                 case UPDATE_GUI_SELECTED_NETWORK: {
                     Container container = mc.player.openContainer;
-                    if (container instanceof NetworkHubContainer) {
-                        ((NetworkHubContainer) container).selectedNetwork = message.compound.getUniqueId("networkUuid");
+                    if (container instanceof ContainerNetworkHub) {
+                        ((ContainerNetworkHub) container).selectedNetwork = message.compound.getUniqueId("networkUuid");
                     }
                     break;
                 }
@@ -69,8 +73,9 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     }
 
     public static enum ServerToClient {
+        INIT_NETWORKS,
         UPDATE_NETWORKS,
-        DELETE_NETWORK,
+        DELETE_NETWORKS,
         UPDATE_GUI_SELECTED_NETWORK
     }
 }

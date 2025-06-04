@@ -2,9 +2,9 @@ package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.data.BlockPosDim;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
-import com.xinyihl.ymadditions.common.container.NetworkHubContainer;
+import com.xinyihl.ymadditions.common.api.BlockPosDim;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -36,7 +36,7 @@ import static com.xinyihl.ymadditions.common.network.PacketClientToServer.Client
 
 /* 由魔法数字组成的 GUI （；´д｀）ゞ */
 @SideOnly(Side.CLIENT)
-public class NetworkHubGuiContainer extends GuiContainer {
+public class GuiNetworkHub extends GuiContainer {
     private static final int SCROLL_BAR_WIDTH = 6;
     private static final int SCROLL_BAR_LEFT = 96;
     private final List<NetButton> networkButtons = new ArrayList<>();
@@ -48,7 +48,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
     private GuiButton deleteButton;
     private GuiButton connectButton;
     private GuiButton disConnectButton;
-    private final NetworkHubContainer networkHubContainer;
+    private final ContainerNetworkHub containerNetworkHub;
     private int oldNetworksSize;
 
     private GuiTextField textField;
@@ -57,15 +57,15 @@ public class NetworkHubGuiContainer extends GuiContainer {
     private static String searchNet = "";
     private boolean updateNetButtons = false;
 
-    public NetworkHubGuiContainer(NetworkHubContainer networkHubContainer) {
-        super(networkHubContainer);
+    public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
+        super(containerNetworkHub);
         this.xSize = 200;
         this.ySize = 166;
-        this.networkHubContainer = networkHubContainer;
+        this.containerNetworkHub = containerNetworkHub;
     }
 
-    private NetworkStatus showInfo() {
-        return networkHubContainer.networks.getOrDefault(networkHubContainer.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
+    private NetworkStatus selected() {
+        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
     }
 
     public List<Rectangle> getExtraAreas() {
@@ -85,17 +85,17 @@ public class NetworkHubGuiContainer extends GuiContainer {
         this.textField        = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 20);
         this.searchField      = new GuiTextField(1001, this.fontRenderer, guiLeft + 110,guiTop + 4,   80, this.fontRenderer.FONT_HEIGHT);
 
-        if (this.networkHubContainer.networkHub.isConnected()) {
+        if (this.containerNetworkHub.networkHub.isConnected()) {
             this.createButton.enabled = false;
         }
 
-        if (this.networkHubContainer.networkHub.isHead()) {
+        if (this.containerNetworkHub.networkHub.isHead()) {
             this.createButton.enabled = false;
             this.connectButton.enabled = false;
             this.disConnectButton.enabled = false;
         }
 
-        this.lockButton.setLocked(!this.showInfo().isPublic());
+        this.lockButton.setLocked(!this.selected().isPublic());
 
         this.textField.setVisible(false);
         this.textField.setMaxStringLength(10);
@@ -117,7 +117,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
     }
 
     private boolean isButUpdate() {
-        int oldNetworksSize = this.networkHubContainer.networks.size();
+        int oldNetworksSize = this.containerNetworkHub.networks.size();
         if (this.oldNetworksSize != oldNetworksSize) {
             this.oldNetworksSize = oldNetworksSize;
             return true;
@@ -132,7 +132,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
     private void updateNetworksButtons() {
         if (!this.isButUpdate() && scrollOffset == lastScrollOffset) return;
         this.networkButtons.clear();
-        List<NetworkStatus> networks = networkHubContainer.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).collect(Collectors.toList());
+        List<NetworkStatus> networks = containerNetworkHub.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).collect(Collectors.toList());
         for (int i = 0; i < 4; i++) {
             int index = scrollOffset / 20 + i;
             if (index >= networks.size()) break;
@@ -166,13 +166,13 @@ public class NetworkHubGuiContainer extends GuiContainer {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
-        boolean isHead = this.networkHubContainer.networkHub.isHead();
-        this.lockButton.setLocked(!showInfo().isPublic());
-        this.createButton.enabled = !isHead && !this.networkHubContainer.networkHub.isConnected();
+        boolean isHead = this.containerNetworkHub.networkHub.isHead();
+        this.lockButton.setLocked(!selected().isPublic());
+        this.createButton.enabled = !isHead && !this.containerNetworkHub.networkHub.isConnected();
         this.disConnectButton.enabled = !isHead;
         this.connectButton.enabled = !isHead;
 
-        int listHeight = (int) this.networkHubContainer.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).count() * 20;
+        int listHeight = (int) this.containerNetworkHub.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).count() * 20;
         int visibleHeight = 80;
         this.maxScroll = Math.max(0, listHeight - visibleHeight);
 
@@ -216,11 +216,11 @@ public class NetworkHubGuiContainer extends GuiContainer {
         int rightPanelX = 110;
         int rightPanelY = 19;
         this.fontRenderer.drawString(I18n.format("tile.ymadditions.network_hub.name"), 7, 5, 0xFF404040);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.showInfo().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.showInfo().getSurplusChannels(), rightPanelX, rightPanelY + 15, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.showInfo().getPos().getDimension(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.showInfo().isPublic()), rightPanelX, rightPanelY + 45, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + networkHubContainer.networkHub.isConnected()), rightPanelX, rightPanelY + 60, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY + 15, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isPublic()), rightPanelX, rightPanelY + 45, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY + 60, 0xFFFFFF);
     }
 
     @Override
@@ -243,7 +243,7 @@ public class NetworkHubGuiContainer extends GuiContainer {
                 return;
             }
         }
-        if (networkHubContainer.selectedNetwork.equals(new UUID(0, 0))) {
+        if (containerNetworkHub.selectedNetwork.equals(new UUID(0, 0))) {
             return;
         }
 

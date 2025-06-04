@@ -9,15 +9,14 @@ import appeng.api.util.AEPartLocation;
 import appeng.core.AEConfig;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.data.BlockPosDim;
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.api.BlockPosDim;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.integration.crt.NetHubPowerUsage;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
-import com.xinyihl.ymadditions.common.registry.BlocksAndItems;
+import com.xinyihl.ymadditions.common.registry.Registry;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -32,12 +31,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.xinyihl.ymadditions.common.block.BlockNetworkHub.CONNECT;
-import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORK;
+import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORKS;
 
 public class TileNetworkHub extends TitleMeBase implements ITickable {
     private boolean isHead = false;
     private UUID networkUuid = new UUID(0, 0);
-    private UUID owner = new UUID(0, 0);
     private boolean isConnected = false;
     //无需同步&保存
     private IGridConnection connection;
@@ -51,19 +49,13 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
 
     @Override
     public ItemStack getVisualItemStack() {
-        return new ItemStack(BlocksAndItems.itemNetworkHub);
+        return new ItemStack(Registry.itemNetworkHub);
     }
 
     @Nonnull
     @Override
     public AECableType getCableConnectionType(@Nonnull AEPartLocation aePartLocation) {
         return AECableType.DENSE_SMART;
-    }
-
-    @Override
-    public void setOwner(EntityPlayer placer) {
-        super.setOwner(placer);
-        this.owner = placer.getGameProfile().getId();
     }
 
     @Override
@@ -116,7 +108,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         super.readFromNBT(tag);
         this.isHead = tag.getBoolean("isHead");
         this.networkUuid = tag.getUniqueId("networkUuid");
-        this.owner = tag.getUniqueId("owner");
         this.isConnected = tag.getBoolean("isConnected");
     }
 
@@ -126,7 +117,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         super.writeToNBT(tag);
         tag.setBoolean("isHead", this.isHead);
         tag.setUniqueId("networkUuid", this.networkUuid);
-        tag.setUniqueId("owner", this.owner);
         tag.setBoolean("isConnected", this.isConnected);
         return tag;
     }
@@ -191,7 +181,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             storage.removeNetwork(this.networkUuid);
             NBTTagCompound tag = new NBTTagCompound();
             tag.setUniqueId("networkUuid", this.networkUuid);
-            YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORK, tag));
+            YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORKS, tag));
         } else {
             network.removeTargetPos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
         }
@@ -233,7 +223,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             this.isConnected = connected;
             if(this.world.isBlockLoaded(this.getPos())) {
                 IBlockState state = this.world.getBlockState(this.getPos());
-                if(state.getBlock() == BlocksAndItems.blockNetworkHub) {
+                if (state.getBlock() == Registry.blockNetworkHub) {
                     this.markDirty();
                     this.world.notifyBlockUpdate(this.pos, state, state.withProperty(CONNECT, connected), 3);
                 }
@@ -247,10 +237,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
 
     public void setHead(boolean head) {
         this.isHead = head;
-    }
-
-    public UUID getOwner() {
-        return owner;
     }
 
     public UUID getNetworkUuid() {

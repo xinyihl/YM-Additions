@@ -2,11 +2,10 @@ package com.xinyihl.ymadditions.common.block;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
-import com.xinyihl.ymadditions.common.container.GUIContainerHandler;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.container.GuiHandler;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
-import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -29,7 +28,7 @@ import net.minecraft.world.chunk.Chunk;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.xinyihl.ymadditions.common.registry.BlocksAndItems.CREATIVE_TAB;
+import static com.xinyihl.ymadditions.common.registry.Registry.CREATIVE_TAB;
 
 public class BlockNetworkHub extends Block {
     public static final PropertyBool CONNECT = PropertyBool.create("connect");
@@ -79,8 +78,8 @@ public class BlockNetworkHub extends Block {
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileNetworkHub) {
                 NetworkStatus network = NetworkHubDataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());
-                if (Utils.isPlayerOp(playerIn) || playerIn.getGameProfile().getId().equals(((TileNetworkHub) te).getOwner()) || (network != null && network.hasPermission(playerIn, 0))) {
-                    playerIn.openGui(YMAdditions.instance, GUIContainerHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                if (network == null || network.hasPermission(playerIn, 0)) {
+                    playerIn.openGui(YMAdditions.instance, GuiHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
                 } else {
                     playerIn.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }

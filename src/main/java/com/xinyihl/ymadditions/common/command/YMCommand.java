@@ -2,10 +2,12 @@ package com.xinyihl.ymadditions.common.command;
 
 import com.mojang.authlib.GameProfile;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORK;
+import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.DELETE_NETWORKS;
 
 public class YMCommand extends CommandBase {
 
@@ -59,7 +61,6 @@ public class YMCommand extends CommandBase {
     }
 
     private void handleAdd(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        checkPermission(server, sender);
         if (args.length != 3) {
             throw new CommandException("commands.ym.error.args");
         }
@@ -88,7 +89,6 @@ public class YMCommand extends CommandBase {
     }
 
     private void handleRemove(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        checkPermission(server, sender);
         if (args.length != 3) {
             throw new CommandException("commands.ym.error.args");
         }
@@ -113,7 +113,7 @@ public class YMCommand extends CommandBase {
             if (p != null) {
                 NBTTagCompound tag = new NBTTagCompound();
                 tag.setUniqueId("networkUuid", network);
-                YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(DELETE_NETWORK, tag), p);
+                YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(DELETE_NETWORKS, tag), p);
             }
             sender.sendMessage(new TextComponentTranslation("commands.ym.info.remove_success"));
         } else {
@@ -122,7 +122,6 @@ public class YMCommand extends CommandBase {
     }
 
     private void handleList(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        checkPermission(server, sender);
         if (args.length != 2) {
             throw new CommandException("commands.ym.error.args");
         }
@@ -149,6 +148,8 @@ public class YMCommand extends CommandBase {
             NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
             List<NetworkStatus> networkStatusList = storage.getPlayerNetworks((EntityPlayer) sender);
             return getListOfStringsMatchingLastWord(args, networkStatusList.stream().map(NetworkStatus::getUuid).map(UUID::toString).collect(Collectors.toList()));
+        } else if (args.length == 3 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]))) {
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
         return super.getTabCompletions(server, sender, args, targetPos);
     }
@@ -156,10 +157,5 @@ public class YMCommand extends CommandBase {
     @Override
     public int getRequiredPermissionLevel() {
         return 0;
-    }
-
-    @Override
-    public boolean checkPermission(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender) {
-        return true;
     }
 }

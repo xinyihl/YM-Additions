@@ -4,8 +4,8 @@ package com.xinyihl.ymadditions.common.event;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
-import com.xinyihl.ymadditions.common.api.data.NetworkHubDataStorage;
-import com.xinyihl.ymadditions.common.api.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -16,14 +16,15 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.INIT_NETWORKS;
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.UPDATE_NETWORKS;
 
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
@@ -46,15 +47,18 @@ public class NetWorkSyncHandler {
         NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
         List<NetworkStatus> networks = storage.getPlayerNetworks(player);
         if (!networks.isEmpty()) {
-            NBTTagCompound tag = new NBTTagCompound();
-            NBTTagList list = new NBTTagList();
-            for (NetworkStatus network : networks) {
-                list.appendTag(network.writeToNBT(new NBTTagCompound()));
-                network.setNeedTellClient(false);
-            }
-            tag.setTag("networks", list);
-            YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_NETWORKS, tag), player);
+            YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(INIT_NETWORKS, networksToNBT(networks)), player);
         }
+    }
+
+    private static NBTTagCompound networksToNBT(List<NetworkStatus> networks) {
+        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagList list = new NBTTagList();
+        for (NetworkStatus network : networks) {
+            list.appendTag(network.writeToNBT(new NBTTagCompound()));
+        }
+        tag.setTag("networks", list);
+        return tag;
     }
 
     @SubscribeEvent
@@ -70,13 +74,7 @@ public class NetWorkSyncHandler {
                 List<NetworkStatus> networks = storage.getPlayerNeedUpdateNetworks(player);
                 if (!networks.isEmpty()) {
                     updateNetworks.addAll(networks);
-                    NBTTagCompound tag = new NBTTagCompound();
-                    NBTTagList list = new NBTTagList();
-                    for (NetworkStatus network : networks) {
-                        list.appendTag(network.writeToNBT(new NBTTagCompound()));
-                    }
-                    tag.setTag("networks", list);
-                    YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_NETWORKS, tag), player);
+                    YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_NETWORKS, networksToNBT(networks)), player);
                 }
             });
             updateNetworks.forEach((networkStatus) -> networkStatus.setNeedTellClient(false));

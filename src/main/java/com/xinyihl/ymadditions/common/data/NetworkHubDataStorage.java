@@ -1,6 +1,7 @@
-package com.xinyihl.ymadditions.common.api.data;
+package com.xinyihl.ymadditions.common.data;
 
 import com.xinyihl.ymadditions.Tags;
+import com.xinyihl.ymadditions.common.api.NetworkStatus;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
