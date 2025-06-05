@@ -9,7 +9,7 @@ public interface IListItem<T> {
 
     void setSelected(boolean selected);
 
-    int getId();
+    Object getId();
 
     void click();
 

@@ -2,7 +2,6 @@ package com.xinyihl.ymadditions.client.component;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
 import com.xinyihl.ymadditions.client.api.IText;
-import com.xinyihl.ymadditions.client.control.ListItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -11,9 +10,11 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ListCtrl<T extends IText> extends Gui{
+public abstract class ListCtrl<T extends IText> extends Gui {
 
     public final int width;
     public final int height;
@@ -25,14 +26,14 @@ public class ListCtrl<T extends IText> extends Gui{
     private boolean scrollByItem = false;
     private boolean scroll = false;
     private boolean isSelected = false;
-
-    private final List<T> items;
+    private final Collection<T> items;
+    private String filter = "";
     private final List<IListItem<T>> drawItems = new ArrayList<>();
-    private int selected;
+    private Object selected;
 
     private int scrollOffset;
-    private final int listHeight;
-    private final int maxScrollOffset;
+    private int listHeight;
+    private int maxScrollOffset;
 
     private int scrollBarHeight;
     private int scrollBarY;
@@ -40,7 +41,7 @@ public class ListCtrl<T extends IText> extends Gui{
 
     private int scrollWidth = 3;
 
-    public ListCtrl(Minecraft mc, int x, int y, int width, int height, int itemHeight, List<T> items) {
+    public ListCtrl(Minecraft mc, int x, int y, int width, int height, int itemHeight, Collection<T> items) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -48,8 +49,6 @@ public class ListCtrl<T extends IText> extends Gui{
         this.itemHeight = itemHeight == 0 ? 1 : itemHeight;
         this.items = items;
         this.mc = mc;
-        this.listHeight = items.size() * itemHeight;
-        this.maxScrollOffset = Math.max(this.listHeight - height, 0);
     }
 
     public void setScrollByItem(boolean scrollByItem) {
@@ -68,8 +67,16 @@ public class ListCtrl<T extends IText> extends Gui{
         this.isSelected = isSelected;
     }
 
-    public void setSelected(int selected) {
+    public void setSelected(Object selected) {
         this.selected = selected;
+    }
+
+    public void setScrollOffset(int scrollOffset) {
+        this.scrollOffset = scrollOffset;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 
     public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -80,6 +87,9 @@ public class ListCtrl<T extends IText> extends Gui{
             item.draw(mc, mouseX, mouseY, partialTicks);
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
+
+        this.listHeight = (int) items.stream().filter(n -> n.getText().startsWith(filter)).count() * itemHeight;
+        this.maxScrollOffset = Math.max(this.listHeight - height, 0);
 
         if (this.scroll) {
             this.scrollBarHeight = this.height;
@@ -99,11 +109,12 @@ public class ListCtrl<T extends IText> extends Gui{
     public void refresh() {
         this.drawItems.clear();
         int drawSize = this.height / this.itemHeight + 2;
+        List<T> filter = this.items.stream().filter(n -> n.getText().startsWith(this.filter)).collect(Collectors.toList());
         for (int i = 0; i < drawSize; i++) {
             int index = this.scrollOffset / this.itemHeight + i;
-            if (index >= this.items.size()) break;
-            IListItem<T> item = this.getItem(index, this.items.get(index).getText(), this.items.get(index), this.x, this.y + i * this.itemHeight - this.scrollOffset % this.itemHeight, this.width - (this.scroll ? scrollWidth + 2 : 0), this.itemHeight);
-            item.setSelected(this.selected == index);
+            if (index >= filter.size()) break;
+            IListItem<T> item = this.getItem(filter.get(index).getId(), filter.get(index).getText(), filter.get(index), this.x, this.y + i * this.itemHeight - this.scrollOffset % this.itemHeight, this.width - (this.scroll ? scrollWidth + 2 : 0), this.itemHeight);
+            item.setSelected(this.selected.equals(item.getId()));
             this.drawItems.add(item);
         }
     }
@@ -112,15 +123,13 @@ public class ListCtrl<T extends IText> extends Gui{
         if (mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height){
             int mouseWheel = Mouse.getEventDWheel();
             if (mouseWheel != 0) {
-                this.scrollOffset = MathHelper.clamp(this.scrollOffset - ((int) Math.signum(mouseWheel) * (this.scrollByItem ? this.itemHeight : 1)), 0, this.maxScrollOffset);
+                this.scrollOffset = MathHelper.clamp(this.scrollOffset - ((int) Math.signum(mouseWheel) * (this.scrollByItem ? this.itemHeight : 3)), 0, this.maxScrollOffset);
                 this.refresh();
             }
         }
     }
 
-    private IListItem<T> getItem(int id, String text, T o, int x, int y, int width, int height){
-        return new ListItem<>(id, text, o, x, y, width, height);
-    }
+    protected abstract IListItem<T> getItem(Object id, String text, T o, int x, int y, int width, int height);
 
     private int lastMouseY;
 

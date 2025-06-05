@@ -4,9 +4,9 @@ import com.xinyihl.ymadditions.client.api.IListItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 
-public class ListItem<T> extends Gui implements IListItem<T> {
+public abstract class ListItem<T> extends Gui implements IListItem<T> {
 
-    private int id;
+    private final Object id;
 
     private final String text;
     private final T o;
@@ -18,7 +18,7 @@ public class ListItem<T> extends Gui implements IListItem<T> {
 
     public boolean selected;
 
-    public ListItem(int id, String text, T o, int x, int y, int width, int height) {
+    public ListItem(Object id, String text, T o, int x, int y, int width, int height) {
         this.id = id;
         this.o = o;
         this.text = text;
@@ -52,7 +52,7 @@ public class ListItem<T> extends Gui implements IListItem<T> {
     }
 
     @Override
-    public int getId() {
+    public Object getId() {
         return id;
     }
 

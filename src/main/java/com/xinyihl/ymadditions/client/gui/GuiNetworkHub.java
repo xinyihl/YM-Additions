@@ -2,22 +2,24 @@ package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
+import com.xinyihl.ymadditions.client.api.IListItem;
+import com.xinyihl.ymadditions.client.component.ListCtrl;
+import com.xinyihl.ymadditions.client.control.ListItem;
+import com.xinyihl.ymadditions.client.control.MyButton;
+import com.xinyihl.ymadditions.client.control.MyLockIconButton;
 import com.xinyihl.ymadditions.common.api.BlockPosDim;
 import com.xinyihl.ymadditions.common.api.NetworkStatus;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -30,42 +32,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
 /* 由魔法数字组成的 GUI （；´д｀）ゞ */
 @SideOnly(Side.CLIENT)
 public class GuiNetworkHub extends GuiContainer {
-    private static final int SCROLL_BAR_WIDTH = 6;
-    private static final int SCROLL_BAR_LEFT = 96;
-    private final List<NetButton> networkButtons = new ArrayList<>();
-    private int scrollOffset;
-    private int maxScroll;
-    private int lastScrollOffset = -1;
+    private static String searchNet = "";
+    private final ContainerNetworkHub containerNetworkHub;
+    private ListCtrl<NetworkStatus> listCtrl;
+    private GuiTextField searchField;
     private GuiLockIconButton lockButton;
     private GuiButton createButton;
     private GuiButton deleteButton;
     private GuiButton connectButton;
     private GuiButton disConnectButton;
-    private final ContainerNetworkHub containerNetworkHub;
-    private int oldNetworksSize;
-
     private GuiTextField textField;
-    private GuiTextField searchField;
     private boolean isCreating = false;
-    private static String searchNet = "";
-    private boolean updateNetButtons = false;
 
     public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
         super(containerNetworkHub);
-        this.xSize = 200;
-        this.ySize = 166;
         this.containerNetworkHub = containerNetworkHub;
-    }
-
-    private NetworkStatus selected() {
-        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
+        this.xSize = 200;
+        this.ySize = 159;
     }
 
     public List<Rectangle> getExtraAreas() {
@@ -77,13 +66,40 @@ public class GuiNetworkHub extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        this.createButton     = new GuiButton(995, guiLeft + 26 , guiTop + 110, 70, 20, I18n.format("gui.ymadditions.network_hub.button.create"));
-        this.deleteButton     = new GuiButton(996, guiLeft + 26 , guiTop + 135, 70, 20, I18n.format("gui.ymadditions.network_hub.button.delete"));
-        this.connectButton    = new GuiButton(997, guiLeft + 103, guiTop + 110, 70, 20, I18n.format("gui.ymadditions.network_hub.button.connect"));
-        this.disConnectButton = new GuiButton(998, guiLeft + 103, guiTop + 135, 70, 20, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
-        this.lockButton       = new GuiLockIconButton(999, guiLeft + 201, guiTop + 12);
-        this.textField        = new GuiTextField(1000, this.fontRenderer, guiLeft + 26, guiTop + 110, 70, 20);
-        this.searchField      = new GuiTextField(1001, this.fontRenderer, guiLeft + 110,guiTop + 4,   80, this.fontRenderer.FONT_HEIGHT);
+        this.listCtrl = new ListCtrl<NetworkStatus>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
+            @Override
+            protected IListItem<NetworkStatus> getItem(Object id, String text, NetworkStatus o, int x, int y, int width, int height) {
+                return new ListItem<NetworkStatus>(id, text, o, x, y, width, height) {
+                    @Override
+                    public void click() {
+                        NBTTagCompound tag = new NBTTagCompound();
+                        tag.setInteger("button", 0);
+                        tag.setUniqueId("networkUuid", get().getUuid());
+                        YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
+                    }
+                };
+            }
+        };
+        this.listCtrl.setScroll(true);
+        this.listCtrl.setIsSelected(true);
+        this.listCtrl.setFilter(searchNet);
+        this.listCtrl.setSelected(containerNetworkHub.selectedNetwork);
+        this.listCtrl.refresh();
+
+        this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 9, guiTop + 17, 86, 11);
+        this.searchField.setVisible(true);
+        this.searchField.setMaxStringLength(10);
+        this.searchField.setEnableBackgroundDrawing(false);
+        this.searchField.setTextColor(16777215);
+        this.searchField.setText(searchNet);
+        this.searchField.setFocused(false);
+
+        this.createButton = new MyButton(995, guiLeft + 106, guiTop + 113, 32, 11, I18n.format("gui.ymadditions.network_hub.button.create"));
+        this.deleteButton = new MyButton(996, guiLeft + 106, guiTop + 133, 32, 11, I18n.format("gui.ymadditions.network_hub.button.delete"));
+        this.connectButton = new MyButton(997, guiLeft + 154, guiTop + 113, 32, 11, I18n.format("gui.ymadditions.network_hub.button.connect"));
+        this.disConnectButton = new MyButton(998, guiLeft + 154, guiTop + 133, 32, 11, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
+        this.lockButton = new MyLockIconButton(999, guiLeft + 201, guiTop + 12);
+        this.textField = new GuiTextField(1000, this.fontRenderer, guiLeft + 108, guiTop + 113, 29, 11);
 
         if (this.containerNetworkHub.networkHub.isConnected()) {
             this.createButton.enabled = false;
@@ -99,61 +115,13 @@ public class GuiNetworkHub extends GuiContainer {
 
         this.textField.setVisible(false);
         this.textField.setMaxStringLength(10);
-
-        this.searchField.setVisible(true);
-        this.searchField.setMaxStringLength(10);
-        this.searchField.setEnableBackgroundDrawing(false);
-        this.searchField.setTextColor(16777215);
-        this.searchField.setText(searchNet);
-        this.searchField.setFocused(false);
+        this.textField.setEnableBackgroundDrawing(false);
 
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);
         this.buttonList.add(this.connectButton);
         this.buttonList.add(this.disConnectButton);
         this.buttonList.add(this.lockButton);
-
-        updateNetworksButtons();
-    }
-
-    private boolean isButUpdate() {
-        int oldNetworksSize = this.containerNetworkHub.networks.size();
-        if (this.oldNetworksSize != oldNetworksSize) {
-            this.oldNetworksSize = oldNetworksSize;
-            return true;
-        }
-        if (updateNetButtons) {
-            this.updateNetButtons = false;
-            return true;
-        }
-        return false;
-    }
-
-    private void updateNetworksButtons() {
-        if (!this.isButUpdate() && scrollOffset == lastScrollOffset) return;
-        this.networkButtons.clear();
-        List<NetworkStatus> networks = containerNetworkHub.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).collect(Collectors.toList());
-        for (int i = 0; i < 4; i++) {
-            int index = scrollOffset / 20 + i;
-            if (index >= networks.size()) break;
-            NetButton btn = new NetButton(index, guiLeft + 8, guiTop + 17 + i * 21 - scrollOffset % 20, 85, 20, networks.get(index).getNetworkName(), networks.get(index));
-            this.networkButtons.add(btn);
-        }
-        this.lastScrollOffset = scrollOffset;
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/network_hub.png"));
-        this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
     }
 
     @Override
@@ -172,30 +140,7 @@ public class GuiNetworkHub extends GuiContainer {
         this.disConnectButton.enabled = !isHead;
         this.connectButton.enabled = !isHead;
 
-        int listHeight = (int) this.containerNetworkHub.networks.values().stream().filter(n -> n.getNetworkName().startsWith(searchNet)).count() * 20;
-        int visibleHeight = 80;
-        this.maxScroll = Math.max(0, listHeight - visibleHeight);
-
-        updateNetworksButtons();
-        ScissorHelper.enableScissor(mc, guiLeft + 8, guiTop + 17, 110, visibleHeight + 3);
-        for (NetButton btn : networkButtons) {
-            btn.drawButton(mc, mouseX, mouseY, partialTicks);
-        }
-        ScissorHelper.disableScissor();
-
-        int scrollBarHeight;
-        if (maxScroll <= 0) {
-            scrollBarHeight = visibleHeight;
-        } else {
-            scrollBarHeight = (int) ((float) visibleHeight / listHeight * visibleHeight);
-            scrollBarHeight = Math.max(10, scrollBarHeight);
-        }
-        int scrollBarY = guiTop + 15;
-        if (maxScroll > 0) {
-            scrollBarY += (int) ((float) scrollOffset / maxScroll * (visibleHeight - scrollBarHeight));
-        }
-        drawRect(guiLeft + SCROLL_BAR_LEFT, guiTop + 15, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, guiTop + 21 + visibleHeight,      0xFF9c9c9c);
-        drawRect(guiLeft + SCROLL_BAR_LEFT,       scrollBarY, guiLeft + SCROLL_BAR_LEFT + SCROLL_BAR_WIDTH, scrollBarY + scrollBarHeight + 6, 0xFF373737);
+        this.listCtrl.draw(mouseX, mouseY, partialTicks);
 
         this.textField.drawTextBox();
         this.searchField.drawTextBox();
@@ -203,19 +148,31 @@ public class GuiNetworkHub extends GuiContainer {
         if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
             this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX, mouseY);
         }
+    }
 
-        for (NetButton btn : networkButtons) {
-            if (this.isMouseOverButton(btn, mouseX, mouseY)) {
-                this.drawHoveringText("UUID: " + btn.networkStatus.getUuid(), mouseX, mouseY);
-            }
-        }
+    @Override
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/test.png"));
+        this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
+
+    private NetworkStatus selected() {
+        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        int rightPanelX = 110;
+        int rightPanelX = 103;
         int rightPanelY = 19;
-        this.fontRenderer.drawString(I18n.format("tile.ymadditions.network_hub.name"), 7, 5, 0xFF404040);
+        this.drawCenteredString(mc.fontRenderer, I18n.format("tile.ymadditions.network_hub.name"), xSize / 2, 4, 0xFFFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY + 15, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
@@ -233,16 +190,7 @@ public class GuiNetworkHub extends GuiContainer {
             this.textField.setFocused(true);
             return;
         }
-        if (ba instanceof NetButton) {
-            NetButton button = (NetButton) ba;
-            if (networkButtons.contains(button)) {
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setInteger("button", 0);
-                tag.setUniqueId("networkUuid", button.networkStatus.getUuid());
-                YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
-                return;
-            }
-        }
+
         if (containerNetworkHub.selectedNetwork.equals(new UUID(0, 0))) {
             return;
         }
@@ -274,10 +222,11 @@ public class GuiNetworkHub extends GuiContainer {
             return;
         }
         if (searchField.isFocused()) {
-            if(this.searchField.textboxKeyTyped(typedChar, keyCode)){
+            if (this.searchField.textboxKeyTyped(typedChar, keyCode)) {
                 searchNet = this.searchField.getText();
-                this.scrollOffset = 0;
-                this.updateNetButtons = true;
+                this.listCtrl.setFilter(searchNet);
+                this.listCtrl.setScrollOffset(0);
+                this.listCtrl.refresh();
             }
             return;
         }
@@ -287,15 +236,15 @@ public class GuiNetworkHub extends GuiContainer {
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        int x = Mouse.getEventX() * this.width / this.mc.displayWidth;
-        int y = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
-        // guiLeft + 8, guiTop + 17, 110, visibleHeight + 3
-        if (x >= guiLeft + 8 && y >= guiTop + 17 && x < guiLeft + 8 + 95 && y < guiTop + 17 + 83){
-            int mouseWheel = Mouse.getEventDWheel();
-            if (mouseWheel != 0) {
-                this.scrollOffset = (int) MathHelper.clamp(scrollOffset - (Math.signum(mouseWheel) * 20), 0, maxScroll);
-            }
-        }
+        int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+        listCtrl.handleMouseInput(i, j);
+    }
+
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        listCtrl.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
     }
 
     @Override
@@ -307,14 +256,15 @@ public class GuiNetworkHub extends GuiContainer {
             this.textField.setVisible(false);
             return;
         }
-        this.searchField.setFocused(isMouseOverTextField(this.searchField, mouseX, mouseY));
-        for (NetButton btn : networkButtons) {
-            if (btn.mousePressed(mc, mouseX, mouseY)) {
-                btn.playPressSound(mc.getSoundHandler());
-                this.actionPerformed(btn);
-            }
-        }
         super.mouseClicked(mouseX, mouseY, mouseButton);
+        listCtrl.mouseClicked(mouseX, mouseY, mouseButton);
+        this.searchField.setFocused(isMouseOverTextField(this.searchField, mouseX, mouseY));
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        listCtrl.mouseReleased(mouseX, mouseY, state);
     }
 
     private boolean isMouseOverTextField(GuiTextField textField, int mouseX, int mouseY) {
@@ -323,26 +273,5 @@ public class GuiNetworkHub extends GuiContainer {
 
     private boolean isMouseOverButton(GuiButton button, int mouseX, int mouseY) {
         return mouseX >= button.x && mouseY >= button.y && mouseX < button.x + button.width && mouseY < button.y + button.height;
-    }
-
-    public static class NetButton extends GuiButton {
-        public NetworkStatus networkStatus;
-        public NetButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText, NetworkStatus networkStatus) {
-            super(buttonId, x, y, widthIn, heightIn, buttonText);
-            this.networkStatus = networkStatus;
-        }
-    }
-
-    public static class ScissorHelper {
-        public static void enableScissor(Minecraft mc, int x, int y, int width, int height) {
-            ScaledResolution res = new ScaledResolution(mc);
-            int scaleFactor = res.getScaleFactor();
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            GL11.glScissor(x * scaleFactor, mc.displayHeight - (y + height) * scaleFactor, width * scaleFactor, height * scaleFactor);
-        }
-
-        public static void disableScissor() {
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
-        }
     }
 }

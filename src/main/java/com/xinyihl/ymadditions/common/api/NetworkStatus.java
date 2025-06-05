@@ -1,6 +1,7 @@
 package com.xinyihl.ymadditions.common.api;
 
 import com.xinyihl.ymadditions.Configurations;
+import com.xinyihl.ymadditions.client.api.IText;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,7 +11,7 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class NetworkStatus {
+public class NetworkStatus implements IText {
     @Nonnull
     private UUID uuid = new UUID(0, 0);
     @Nonnull
@@ -187,5 +188,15 @@ public class NetworkStatus {
 
     public void setNeedTellClient(boolean needTellClient) {
         this.needTellClient = needTellClient;
+    }
+
+    @Override
+    public Object getId() {
+        return uuid;
+    }
+
+    @Override
+    public String getText() {
+        return networkName;
     }
 }
