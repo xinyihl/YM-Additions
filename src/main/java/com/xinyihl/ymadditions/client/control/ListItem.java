@@ -35,12 +35,12 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
 
     @Override
     public void draw(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        int color = 0xFF2B2B2B;
+        int color = 0x00000000;
         if (isMouseOver(mouseX, mouseY)) {
-            color = 0xFF323232;
+            color = 0x2DFFFFFF;
         }
         if (selected) {
-            color = 0xFF505D94;
+            color = 0x3C505D94;
         }
         drawRect(this.x, this.y, this.x + this.width, this.y + height, color);
         this.drawCenteredString(mc.fontRenderer, this.text, this.x + this.width / 2, this.y + (this.height - 8) / 2, 0xFFFFFFFF);

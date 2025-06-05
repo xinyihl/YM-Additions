@@ -77,17 +77,17 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                 }
                 if (this.isHead) {
                     if(this.isConnected){
-                        int howMany = 0;
-                        for(IGridConnection gc : this.getActionableNode().getConnections()) {
-                            howMany = Math.max(gc.getUsedChannels(), howMany);
-                        }
-                        int surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
-                        if (this.lastSurplusChannels != surplusChannels) {
-                            this.lastSurplusChannels = surplusChannels;
-                            network.setSurplusChannels(surplusChannels);
-                            network.setNeedTellClient(true);
-                        }
                         this.setConnected(!network.getTargetPos().isEmpty());
+                    }
+                    int howMany = 0;
+                    for(IGridConnection gc : this.getActionableNode().getConnections()) {
+                        howMany = Math.max(gc.getUsedChannels(), howMany);
+                    }
+                    int surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
+                    if (this.lastSurplusChannels != surplusChannels) {
+                        this.lastSurplusChannels = surplusChannels;
+                        network.setSurplusChannels(surplusChannels);
+                        network.setNeedTellClient(true);
                     }
                 } else {
                     if (this.getPos().equals(network.getPos().toBlockPos())) {

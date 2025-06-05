@@ -47,7 +47,7 @@ public class GuiNetworkHub extends GuiContainer {
     private GuiButton deleteButton;
     private GuiButton connectButton;
     private GuiButton disConnectButton;
-    private GuiTextField textField;
+    private GuiTextField createField;
     private boolean isCreating = false;
 
     public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
@@ -86,7 +86,7 @@ public class GuiNetworkHub extends GuiContainer {
         this.listCtrl.setSelected(containerNetworkHub.selectedNetwork);
         this.listCtrl.refresh();
 
-        this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 9, guiTop + 17, 86, 11);
+        this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 10, guiTop + 17, 85, 11);
         this.searchField.setVisible(true);
         this.searchField.setMaxStringLength(10);
         this.searchField.setEnableBackgroundDrawing(false);
@@ -94,12 +94,12 @@ public class GuiNetworkHub extends GuiContainer {
         this.searchField.setText(searchNet);
         this.searchField.setFocused(false);
 
-        this.createButton = new MyButton(995, guiLeft + 106, guiTop + 113, 32, 11, I18n.format("gui.ymadditions.network_hub.button.create"));
-        this.deleteButton = new MyButton(996, guiLeft + 106, guiTop + 133, 32, 11, I18n.format("gui.ymadditions.network_hub.button.delete"));
-        this.connectButton = new MyButton(997, guiLeft + 154, guiTop + 113, 32, 11, I18n.format("gui.ymadditions.network_hub.button.connect"));
-        this.disConnectButton = new MyButton(998, guiLeft + 154, guiTop + 133, 32, 11, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
+        this.createButton = new MyButton(995, guiLeft + 105, guiTop + 113, 37, 14, I18n.format("gui.ymadditions.network_hub.button.create"));
+        this.deleteButton = new MyButton(996, guiLeft + 105, guiTop + 133, 37, 14, I18n.format("gui.ymadditions.network_hub.button.delete"));
+        this.connectButton = new MyButton(997, guiLeft + 151, guiTop + 113, 37, 14, I18n.format("gui.ymadditions.network_hub.button.connect"));
+        this.disConnectButton = new MyButton(998, guiLeft + 151, guiTop + 133, 37, 14, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
         this.lockButton = new MyLockIconButton(999, guiLeft + 201, guiTop + 12);
-        this.textField = new GuiTextField(1000, this.fontRenderer, guiLeft + 108, guiTop + 113, 29, 11);
+        this.createField = new GuiTextField(1000, this.fontRenderer, guiLeft + 108, guiTop + 116, 29, 14);
 
         if (this.containerNetworkHub.networkHub.isConnected()) {
             this.createButton.enabled = false;
@@ -113,9 +113,9 @@ public class GuiNetworkHub extends GuiContainer {
 
         this.lockButton.setLocked(!this.selected().isPublic());
 
-        this.textField.setVisible(false);
-        this.textField.setMaxStringLength(10);
-        this.textField.setEnableBackgroundDrawing(false);
+        this.createField.setVisible(false);
+        this.createField.setMaxStringLength(10);
+        this.createField.setEnableBackgroundDrawing(false);
 
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);
@@ -142,7 +142,7 @@ public class GuiNetworkHub extends GuiContainer {
 
         this.listCtrl.draw(mouseX, mouseY, partialTicks);
 
-        this.textField.drawTextBox();
+        this.createField.drawTextBox();
         this.searchField.drawTextBox();
 
         if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
@@ -157,7 +157,7 @@ public class GuiNetworkHub extends GuiContainer {
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/test.png"));
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/network_hub.png"));
         this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 
         GlStateManager.disableBlend();
@@ -186,8 +186,8 @@ public class GuiNetworkHub extends GuiContainer {
             this.createButton.enabled = false;
             this.createButton.visible = false;
             this.isCreating = true;
-            this.textField.setVisible(true);
-            this.textField.setFocused(true);
+            this.createField.setVisible(true);
+            this.createField.setFocused(true);
             return;
         }
 
@@ -205,19 +205,19 @@ public class GuiNetworkHub extends GuiContainer {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if (isCreating) {
-            this.textField.textboxKeyTyped(typedChar, keyCode);
+            this.createField.textboxKeyTyped(typedChar, keyCode);
             if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
                 this.connectButton.enabled = false;
                 this.disConnectButton.enabled = false;
                 this.createButton.visible = true;
                 this.isCreating = false;
-                this.textField.setVisible(false);
+                this.createField.setVisible(false);
 
                 NBTTagCompound tag = new NBTTagCompound();
                 tag.setInteger("button", 1);
-                tag.setString("name", textField.getText());
+                tag.setString("name", createField.getText());
                 YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
-                this.textField.setText("");
+                this.createField.setText("");
             }
             return;
         }
@@ -249,11 +249,11 @@ public class GuiNetworkHub extends GuiContainer {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (isCreating && !isMouseOverTextField(this.textField, mouseX, mouseY)) {
+        if (isCreating && !isMouseOverTextField(this.createField, mouseX, mouseY)) {
             this.createButton.enabled = true;
             this.createButton.visible = true;
             this.isCreating = false;
-            this.textField.setVisible(false);
+            this.createField.setVisible(false);
             return;
         }
         super.mouseClicked(mouseX, mouseY, mouseButton);
