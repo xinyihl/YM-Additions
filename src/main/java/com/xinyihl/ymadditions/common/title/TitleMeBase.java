@@ -11,6 +11,7 @@ import appeng.me.helpers.IGridProxyable;
 import appeng.me.helpers.MachineSource;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -26,6 +27,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static net.minecraftforge.common.util.Constants.BlockFlags.RERENDER_MAIN_THREAD;
 
 public abstract class TitleMeBase extends TileEntity implements IActionHost, IGridProxyable, IHasProbeInfo {
 
@@ -53,6 +56,11 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
                 proxy.readFromNBT(tag);
             } catch (IllegalStateException e) {
                 //Ignore
+            }
+        } else {
+            if (this.world.isBlockLoaded(this.getPos())) {
+                IBlockState state = this.world.getBlockState(this.getPos());
+                this.world.notifyBlockUpdate(this.pos, state, state, RERENDER_MAIN_THREAD);
             }
         }
     }

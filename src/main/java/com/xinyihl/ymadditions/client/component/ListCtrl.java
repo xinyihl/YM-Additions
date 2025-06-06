@@ -79,7 +79,15 @@ public abstract class ListCtrl<T extends IText> extends Gui {
         this.filter = filter;
     }
 
+    private int lastItemsSize = -1;
+
     public void draw(int mouseX, int mouseY, float partialTicks) {
+
+        if (this.lastItemsSize != this.items.size()) {
+            this.lastItemsSize = this.items.size();
+            this.refresh();
+        }
+
         int scaleFactor = new ScaledResolution(mc).getScaleFactor();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(this.x * scaleFactor, mc.displayHeight - (this.y + this.height) * scaleFactor, this.width * scaleFactor, this.height * scaleFactor);

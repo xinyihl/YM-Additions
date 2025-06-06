@@ -1,7 +1,8 @@
-package com.xinyihl.ymadditions.common.api;
+package com.xinyihl.ymadditions.common.data;
 
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.client.api.IText;
+import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;

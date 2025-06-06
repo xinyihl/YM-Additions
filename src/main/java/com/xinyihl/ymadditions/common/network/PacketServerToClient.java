@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.common.network;
 
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
-import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
+import com.xinyihl.ymadditions.common.data.DataStorage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
@@ -45,7 +45,7 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> {
             World world = Minecraft.getMinecraft().world;
-            NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
+            DataStorage storage = DataStorage.get(world);
             switch (ServerToClient.valueOf(message.type)) {
                 case INIT_NETWORKS: {
                     storage.readFromNBT(message.compound);

@@ -1,7 +1,6 @@
 package com.xinyihl.ymadditions.common.data;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.common.api.NetworkStatus;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -17,21 +16,21 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class NetworkHubDataStorage extends WorldSavedData {
+public class DataStorage extends WorldSavedData {
     private static final String DATA_NAME = Tags.MOD_ID + "_NHDS";
     private final Map<UUID, NetworkStatus> networks = new LinkedHashMap<>();
 
-    public NetworkHubDataStorage(String name) {
+    public DataStorage(String name) {
         super(name);
     }
 
-    public static NetworkHubDataStorage get(World world) {
-        NetworkHubDataStorage data = null;
+    public static DataStorage get(World world) {
+        DataStorage data = null;
         if (world.getMapStorage() != null) {
-            data = (NetworkHubDataStorage) world.getMapStorage().getOrLoadData(NetworkHubDataStorage.class, DATA_NAME);
+            data = (DataStorage) world.getMapStorage().getOrLoadData(DataStorage.class, DATA_NAME);
         }
         if (data == null) {
-            data = new NetworkHubDataStorage(DATA_NAME);
+            data = new DataStorage(DATA_NAME);
             if (world.getMapStorage() != null) {
                 world.getMapStorage().setData(DATA_NAME, data);
             }

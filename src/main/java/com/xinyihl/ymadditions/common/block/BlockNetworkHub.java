@@ -2,9 +2,9 @@ package com.xinyihl.ymadditions.common.block;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.NetworkStatus;
 import com.xinyihl.ymadditions.common.container.GuiHandler;
-import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
+import com.xinyihl.ymadditions.common.data.DataStorage;
+import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -77,7 +77,7 @@ public class BlockNetworkHub extends Block {
         if (!worldIn.isRemote) {
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileNetworkHub) {
-                NetworkStatus network = NetworkHubDataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());
+                NetworkStatus network = DataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());
                 if (network == null || network.hasPermission(playerIn, 0)) {
                     playerIn.openGui(YMAdditions.instance, GuiHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
                 } else {

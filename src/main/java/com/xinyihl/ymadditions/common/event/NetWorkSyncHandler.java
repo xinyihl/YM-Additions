@@ -4,8 +4,8 @@ package com.xinyihl.ymadditions.common.event;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
-import com.xinyihl.ymadditions.common.api.NetworkStatus;
-import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
+import com.xinyihl.ymadditions.common.data.DataStorage;
+import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -44,7 +44,7 @@ public class NetWorkSyncHandler {
 
     private static void initSyncDate(EntityPlayerMP player){
         World world = player.world;
-        NetworkHubDataStorage storage = NetworkHubDataStorage.get(world);
+        DataStorage storage = DataStorage.get(world);
         List<NetworkStatus> networks = storage.getPlayerNetworks(player);
         if (!networks.isEmpty()) {
             YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(INIT_NETWORKS, networksToNBT(networks)), player);
@@ -67,7 +67,7 @@ public class NetWorkSyncHandler {
         if (event.phase != Phase.START) return;
         if (!(event.world instanceof WorldServer)) return;
         if (event.world.getTotalWorldTime() % 20 != 0) return;
-        NetworkHubDataStorage storage = NetworkHubDataStorage.get(event.world);
+        DataStorage storage = DataStorage.get(event.world);
         if (event.world.getMinecraftServer() != null) {
             Set<NetworkStatus> updateNetworks = new HashSet<>();
             event.world.getMinecraftServer().getPlayerList().getPlayers().forEach(player -> {

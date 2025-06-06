@@ -2,8 +2,8 @@ package com.xinyihl.ymadditions.common.command;
 
 import com.mojang.authlib.GameProfile;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.NetworkStatus;
-import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
+import com.xinyihl.ymadditions.common.data.DataStorage;
+import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -72,7 +72,7 @@ public class YMCommand extends CommandBase {
             throw new CommandException("commands.ym.error.player_no_found");
         }
 
-        NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
+        DataStorage storage = DataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
 
         if (networkStatus == null) {
@@ -100,7 +100,7 @@ public class YMCommand extends CommandBase {
             throw new CommandException("commands.ym.error.player_no_found");
         }
 
-        NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
+        DataStorage storage = DataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
 
         if (networkStatus == null) {
@@ -126,7 +126,7 @@ public class YMCommand extends CommandBase {
             throw new CommandException("commands.ym.error.args");
         }
         UUID network = UUID.fromString(args[1]);
-        NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
+        DataStorage storage = DataStorage.get(sender.getEntityWorld());
         NetworkStatus networkStatus = storage.getNetwork(network);
         if (networkStatus == null) {
             throw new CommandException("commands.ym.error.unknown_network");
@@ -145,7 +145,7 @@ public class YMCommand extends CommandBase {
         if (args.length == 1) {
             return getListOfStringsMatchingLastWord(args, Arrays.asList("add", "rm", "list"));
         } else if (args.length == 2 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]) || "list".equalsIgnoreCase(args[0]))) {
-            NetworkHubDataStorage storage = NetworkHubDataStorage.get(sender.getEntityWorld());
+            DataStorage storage = DataStorage.get(sender.getEntityWorld());
             List<NetworkStatus> networkStatusList = storage.getPlayerNetworks((EntityPlayer) sender);
             return getListOfStringsMatchingLastWord(args, networkStatusList.stream().map(NetworkStatus::getUuid).map(UUID::toString).collect(Collectors.toList()));
         } else if (args.length == 3 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]))) {

@@ -1,13 +1,13 @@
 package com.xinyihl.ymadditions.common.container;
 
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.common.api.BlockPosDim;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
 import com.xinyihl.ymadditions.common.api.IInputHandler;
-import com.xinyihl.ymadditions.common.api.NetworkStatus;
-import com.xinyihl.ymadditions.common.data.NetworkHubDataStorage;
+import com.xinyihl.ymadditions.common.data.DataStorage;
+import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
+import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -26,12 +26,12 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
     public TileNetworkHub networkHub;
     public final Map<UUID, NetworkStatus> networks;
     public UUID selectedNetwork;
-    public NetworkHubDataStorage storage;
+    public DataStorage storage;
 
     public ContainerNetworkHub(EntityPlayer player, TileNetworkHub networkHub) {
         this.player = player;
         this.networkHub = networkHub;
-        this.storage = NetworkHubDataStorage.get(networkHub.getWorld());
+        this.storage = DataStorage.get(networkHub.getWorld());
         this.networks = storage.getNetworks();
         this.selectedNetwork = networkHub.getNetworkUuid();
     }
