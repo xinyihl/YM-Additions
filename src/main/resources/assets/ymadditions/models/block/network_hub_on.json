@@ -1,7 +1,7 @@
 {
   "parent": "block/cube_bottom_top",
   "textures": {
-    "particle": "blocks/dirt",
+    "particle": "ymadditions:blocks/network_hub_side_on",
     "bottom": "ymadditions:blocks/network_hub_side",
     "top": "ymadditions:blocks/network_hub_side",
     "side": "ymadditions:blocks/network_hub_side_on"

@@ -60,9 +60,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 if (network != null && network.hasPermission(this.player, 0)) {
                     this.selectedNetwork = uuid;
                 }
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setUniqueId("networkUuid", this.selectedNetwork);
-                YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
+                this.syncSelected((EntityPlayerMP) player);
                 break;
             }
             case 1: { // 创建网络
@@ -72,9 +70,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setUniqueId("networkUuid", this.selectedNetwork);
-                YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
+                this.syncSelected((EntityPlayerMP) player);
                 this.networkHub.sync();
                 break;
             }
@@ -85,7 +81,8 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                     NBTTagCompound tag = new NBTTagCompound();
                     tag.setUniqueId("networkUuid", this.selectedNetwork);
                     YMAdditions.instance.networkWrapper.sendToAll(new PacketServerToClient(DELETE_NETWORKS, tag));
-                    this.selectedNetwork = new UUID(0, 0);
+                    this.selectedNetwork = selectedNetwork.equals(networkHub.getNetworkUuid()) ? new UUID(0, 0) : networkHub.getNetworkUuid();
+                    this.syncSelected((EntityPlayerMP) player);
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
@@ -110,9 +107,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 if (network != null && network.hasPermission(this.player, 0)) {
                     this.networkHub.breakConnection();
                     this.selectedNetwork = new UUID(0, 0);
-                    NBTTagCompound tag = new NBTTagCompound();
-                    tag.setUniqueId("networkUuid", this.selectedNetwork);
-                    YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), (EntityPlayerMP) player);
+                    this.syncSelected((EntityPlayerMP) player);
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
@@ -131,5 +126,11 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 break;
             }
         }
+    }
+
+    public void syncSelected(EntityPlayerMP player){
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setUniqueId("networkUuid", this.selectedNetwork);
+        YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(UPDATE_GUI_SELECTED_NETWORK, tag), player);
     }
 }

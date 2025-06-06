@@ -134,11 +134,15 @@ public class GuiNetworkHub extends GuiContainer {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
+        boolean isSelected = !containerNetworkHub.selectedNetwork.equals(new UUID(0, 0));
         boolean isHead = this.containerNetworkHub.networkHub.isHead();
+        boolean isConnected = this.containerNetworkHub.networkHub.isConnected();
         this.lockButton.setLocked(!selected().isPublic());
-        this.createButton.enabled = !isHead && !this.containerNetworkHub.networkHub.isConnected();
-        this.disConnectButton.enabled = !isHead;
-        this.connectButton.enabled = !isHead;
+        this.lockButton.enabled = isSelected;
+        this.createButton.enabled = !isHead && !isConnected;
+        this.disConnectButton.enabled = isSelected && !isHead && isConnected;
+        this.connectButton.enabled = isSelected && !isHead;
+        this.deleteButton.enabled = isSelected;
 
         this.listCtrl.draw(mouseX, mouseY, partialTicks);
 
@@ -165,7 +169,7 @@ public class GuiNetworkHub extends GuiContainer {
     }
 
     private NetworkStatus selected() {
-        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", true, new BlockPosDim(0, 0, 0, 0)));
+        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", false, new BlockPosDim(0, 0, 0, 0)));
     }
 
     @Override
@@ -174,10 +178,10 @@ public class GuiNetworkHub extends GuiContainer {
         int rightPanelY = 19;
         this.drawCenteredString(mc.fontRenderer, I18n.format("tile.ymadditions.network_hub.name"), xSize / 2, 4, 0xFFFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY + 15, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY + 30, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isPublic()), rightPanelX, rightPanelY + 45, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY + 60, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isPublic()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY + 12, 0xFFFFFF);
     }
 
     @Override

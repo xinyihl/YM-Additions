@@ -3,6 +3,7 @@ itemGroup.yudream_tab=YM-Additions
 tile.ymadditions.network_hub.name=ME Wireless Transceiver
 
 statusmessage.ymadditions.info.nopermission=§cYou don't have permission.
+statusmessage.ymadditions.info.head_delete_protection=§case delete the network first
 
 tooltip.ymadditions.tile_me_base.missing_channel=Device missing channel
 tooltip.ymadditions.tile_me_base.online=Device online
@@ -18,11 +19,11 @@ gui.ymadditions.network_hub.button.disconnect=Disconnect
 gui.ymadditions.network_hub.button.public.desc=Toggle whether the network is public
 gui.ymadditions.network_hub.info.network_name=Name:
 gui.ymadditions.network_hub.info.surplus_channels=channels:
-gui.ymadditions.network_hub.info.dimension_id=Dimension ID:
+gui.ymadditions.network_hub.info.dimension_id=Dimension:
 gui.ymadditions.network_hub.info.public.true=Public: Yes
 gui.ymadditions.network_hub.info.public.false=Public: No
-gui.ymadditions.network_hub.info.state.true=status: Connected
-gui.ymadditions.network_hub.info.state.false=status: Not connected
+gui.ymadditions.network_hub.info.state.true=status: Connect
+gui.ymadditions.network_hub.info.state.false=status: No connect
 
 commands.ym.error.player_no_found=Player not found
 commands.ym.error.no_args=Missing arguments
