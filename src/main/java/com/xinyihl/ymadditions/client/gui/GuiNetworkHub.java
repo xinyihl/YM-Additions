@@ -7,6 +7,7 @@ import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.ListItem;
 import com.xinyihl.ymadditions.client.control.MyButton;
 import com.xinyihl.ymadditions.client.control.MyLockIconButton;
+import com.xinyihl.ymadditions.client.control.MyTextField;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
 import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
@@ -86,7 +87,7 @@ public class GuiNetworkHub extends GuiContainer {
         this.listCtrl.setSelected(containerNetworkHub.selectedNetwork);
         this.listCtrl.refresh();
 
-        this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 10, guiTop + 17, 85, 11);
+        this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 9, guiTop + 17, 85, 11);
         this.searchField.setVisible(true);
         this.searchField.setMaxStringLength(10);
         this.searchField.setEnableBackgroundDrawing(false);
@@ -99,7 +100,7 @@ public class GuiNetworkHub extends GuiContainer {
         this.connectButton = new MyButton(997, guiLeft + 151, guiTop + 113, 37, 14, I18n.format("gui.ymadditions.network_hub.button.connect"));
         this.disConnectButton = new MyButton(998, guiLeft + 151, guiTop + 133, 37, 14, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
         this.lockButton = new MyLockIconButton(999, guiLeft + 201, guiTop + 12);
-        this.createField = new GuiTextField(1000, this.fontRenderer, guiLeft + 108, guiTop + 116, 29, 14);
+        this.createField = new MyTextField(this.mc, 1000, this.fontRenderer, guiLeft + 105, guiTop + 113, 82, 14);
 
         if (this.containerNetworkHub.networkHub.isConnected()) {
             this.createButton.enabled = false;
@@ -189,6 +190,7 @@ public class GuiNetworkHub extends GuiContainer {
         if (createButton.id == ba.id) {
             this.createButton.enabled = false;
             this.createButton.visible = false;
+            this.connectButton.visible = false;
             this.isCreating = true;
             this.createField.setVisible(true);
             this.createField.setFocused(true);
@@ -214,6 +216,7 @@ public class GuiNetworkHub extends GuiContainer {
                 this.connectButton.enabled = false;
                 this.disConnectButton.enabled = false;
                 this.createButton.visible = true;
+                this.connectButton.visible = true;
                 this.isCreating = false;
                 this.createField.setVisible(false);
 
@@ -256,6 +259,7 @@ public class GuiNetworkHub extends GuiContainer {
         if (isCreating && !isMouseOverTextField(this.createField, mouseX, mouseY)) {
             this.createButton.enabled = true;
             this.createButton.visible = true;
+            this.connectButton.visible = true;
             this.isCreating = false;
             this.createField.setVisible(false);
             return;

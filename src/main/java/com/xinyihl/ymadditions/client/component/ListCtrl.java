@@ -2,6 +2,7 @@ package com.xinyihl.ymadditions.client.component;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
 import com.xinyihl.ymadditions.client.api.IText;
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -12,6 +13,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class ListCtrl<T extends IText> extends Gui {
@@ -76,7 +78,7 @@ public abstract class ListCtrl<T extends IText> extends Gui {
     }
 
     public void setFilter(String filter) {
-        this.filter = filter;
+        this.filter = Utils.escapeExprSpecialWord(filter);
     }
 
     private int lastItemsSize = -1;
@@ -96,7 +98,7 @@ public abstract class ListCtrl<T extends IText> extends Gui {
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        this.listHeight = (int) items.stream().filter(n -> n.getText().startsWith(filter)).count() * itemHeight;
+        this.listHeight = (int) items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getText()).find()).count() * itemHeight;
         this.maxScrollOffset = Math.max(this.listHeight - height, 0);
 
         if (this.scroll) {
@@ -117,7 +119,7 @@ public abstract class ListCtrl<T extends IText> extends Gui {
     public void refresh() {
         this.drawItems.clear();
         int drawSize = this.height / this.itemHeight + 2;
-        List<T> filter = this.items.stream().filter(n -> n.getText().startsWith(this.filter)).collect(Collectors.toList());
+        List<T> filter = this.items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getText()).find()).collect(Collectors.toList());
         for (int i = 0; i < drawSize; i++) {
             int index = this.scrollOffset / this.itemHeight + i;
             if (index >= filter.size()) break;
