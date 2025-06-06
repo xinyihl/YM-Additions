@@ -74,6 +74,14 @@ dependencies {
     implementation rfg.deobf("curse.maven:hadenoughitems-557549:5229422")
 }
 
+sourceSets {
+    main {
+        resources {
+            exclude '**/*.psd'
+        }
+    }
+}
+
 processResources {
     inputs.property 'version', project.version
     inputs.property 'mcversion', project.minecraft.version
