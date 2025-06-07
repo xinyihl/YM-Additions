@@ -153,7 +153,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
             this.setConnected(true);
             that.setConnected(true);
-            this.getProxy().setIdlePowerUsage(power * 2);
+            this.getProxy().setIdlePowerUsage(power);
             network.addTargetPos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
         } catch (FailedConnectionException e) {
             this.unsetAll();
