@@ -16,9 +16,7 @@ public class MyTextField extends GuiTextField {
         this.mc = mc;
     }
 
-    public void drawTextBox()
-    {
-        super.drawTextBox();
+    public void drawTextBox() {
         if (this.getVisible()) {
             mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/widgets.png"));
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -28,5 +26,6 @@ public class MyTextField extends GuiTextField {
             this.drawTexturedModalRect(this.x - 3, this.y - 2, 0, 3 * this.height, this.width / 2, this.height);
             this.drawTexturedModalRect((this.x + this.width / 2) - 3, this.y - 2, 200 - this.width / 2, 3 * this.height, this.width / 2, this.height);
         }
+        super.drawTextBox();
     }
 }
