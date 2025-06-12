@@ -24,6 +24,10 @@ gui.ymadditions.network_hub.info.public.true=Public: Yes
 gui.ymadditions.network_hub.info.public.false=Public: No
 gui.ymadditions.network_hub.info.state.true=status: Connect
 gui.ymadditions.network_hub.info.state.false=status: No connect
+gui.ymadditions.network_hub.user.no_selected=No network selected
+gui.ymadditions.network_hub.user.user=member
+gui.ymadditions.network_hub.user.admin=administrator
+gui.ymadditions.network_hub.user.owner=owner
 
 commands.ym.error.player_no_found=Player not found
 commands.ym.error.no_args=Missing arguments

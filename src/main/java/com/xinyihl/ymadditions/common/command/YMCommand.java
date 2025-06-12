@@ -80,7 +80,7 @@ public class YMCommand extends CommandBase {
         }
 
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
-            networkStatus.addUser(player.getId());
+            networkStatus.addUser(player.getId(), 0);
             networkStatus.setNeedTellClient(true);
             sender.sendMessage(new TextComponentTranslation("commands.ym.info.add_success"));
         } else {

@@ -5,6 +5,8 @@ import net.minecraft.client.Minecraft;
 public interface IListItem<T> {
     T get();
 
+    String getTooltip();
+
     void draw(Minecraft mc, int mouseX, int mouseY, float partialTicks);
 
     void setSelected(boolean selected);

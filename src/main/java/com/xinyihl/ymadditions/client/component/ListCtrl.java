@@ -6,13 +6,13 @@ import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.client.config.GuiUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -114,6 +114,15 @@ public abstract class ListCtrl<T extends IText> extends Gui {
             drawRect(this.x + this.width - this.scrollWidth - 1, this.y,          this.x + this.width - 1, this.y + this.height, 0xFF9C9C9C);
             drawRect(this.x + this.width - this.scrollWidth - 1, this.scrollBarY, this.x + this.width - 1, this.scrollBarY + this.scrollBarHeight, 0xFF373737);
         }
+
+        for (IListItem<T> item : this.drawItems) {
+            if (item.isMouseOver(mouseX, mouseY)) {
+                String tooltip = item.getTooltip();
+                if (tooltip != null && !tooltip.isEmpty()) {
+                    GuiUtils.drawHoveringText(Collections.singletonList(I18n.format(tooltip)), mouseX, mouseY, 9999, 9999, -1, mc.fontRenderer);
+                }
+            }
+        }
     }
 
     public void refresh() {
@@ -124,7 +133,8 @@ public abstract class ListCtrl<T extends IText> extends Gui {
             int index = this.scrollOffset / this.itemHeight + i;
             if (index >= filter.size()) break;
             IListItem<T> item = this.getItem(filter.get(index).getId(), filter.get(index).getText(), filter.get(index), this.x, this.y + i * this.itemHeight - this.scrollOffset % this.itemHeight, this.width - (this.scroll ? scrollWidth + 2 : 0), this.itemHeight);
-            item.setSelected(this.selected.equals(item.getId()));
+            if (isSelected)
+                item.setSelected(this.selected.equals(item.getId()));
             this.drawItems.add(item);
         }
     }

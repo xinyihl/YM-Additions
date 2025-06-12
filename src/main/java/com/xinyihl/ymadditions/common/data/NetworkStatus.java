@@ -18,7 +18,7 @@ public class NetworkStatus implements IText {
     @Nonnull
     private UUID owner = new UUID(0, 0);
     @Nonnull
-    private final List<UUID> users = new ArrayList<>();
+    private final Map<UUID, Integer> users = new HashMap<>();
     @Nonnull
     private String networkName = "Unknown";
     private boolean isPublic = false;
@@ -43,24 +43,22 @@ public class NetworkStatus implements IText {
 
     public static NetworkStatus readFromNBT(NBTTagCompound tag) {
         NetworkStatus networkStatus = new NetworkStatus();
-        networkStatus.uuid = Objects.requireNonNull(tag.getUniqueId("u"));
-        networkStatus.owner = Objects.requireNonNull(tag.getUniqueId("o"));
-        networkStatus.networkName = tag.getString("n");
-        networkStatus.isPublic = tag.getBoolean("i");
-        networkStatus.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
-        networkStatus.surplusChannels = tag.getInteger("sc");
-        NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            networkStatus.users.add(nbt.getUniqueId("u"));
-        }
+        networkStatus.updateFromNBT(tag);
         return networkStatus;
     }
 
     public void updateFromNBT(NBTTagCompound tag) {
+        this.uuid = Objects.requireNonNull(tag.getUniqueId("u"));
+        this.owner = Objects.requireNonNull(tag.getUniqueId("o"));
         this.networkName = tag.getString("n");
         this.isPublic = tag.getBoolean("i");
+        this.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         this.surplusChannels = tag.getInteger("sc");
+        NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound nbt = list.getCompoundTagAt(i);
+            this.users.put(nbt.getUniqueId("u"), nbt.getInteger("v"));
+        }
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
@@ -71,9 +69,10 @@ public class NetworkStatus implements IText {
         tag.setTag("p", this.pos.writeToNBT(new NBTTagCompound()));
         tag.setInteger("sc", this.surplusChannels);
         NBTTagList list = new NBTTagList();
-        for (UUID uuid : this.users) {
+        for (Map.Entry<UUID, Integer> entry : this.users.entrySet()) {
             NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setUniqueId("u", uuid);
+            nbt.setUniqueId("u", entry.getKey());
+            nbt.setInteger("v", entry.getValue());
             list.appendTag(nbt);
         }
         tag.setTag("us", list);
@@ -83,6 +82,11 @@ public class NetworkStatus implements IText {
     @Nonnull
     public UUID getUuid() {
         return uuid;
+    }
+
+    @Nonnull
+    public UUID getOwner() {
+        return owner;
     }
 
     @Nonnull
@@ -108,16 +112,24 @@ public class NetworkStatus implements IText {
         return targetPos;
     }
 
-    public List<UUID> getUsers() {
-        return users;
+    public Set<UUID> getUsers() {
+        return users.keySet();
+    }
+
+    public Integer getUserPrem(UUID uuid) {
+        return users.get(uuid);
     }
 
     public void removeUser(UUID uuid) {
         this.users.remove(uuid);
     }
 
-    public void addUser(UUID uuid) {
-        this.users.add(uuid);
+    public void addUser(UUID uuid, int perm) {
+        this.users.put(uuid, perm);
+    }
+
+    public void setUser(UUID uuid, int perm) {
+        this.users.replace(uuid, perm);
     }
 
     public void addTargetPos(@Nonnull BlockPosDim pos) {
@@ -134,18 +146,24 @@ public class NetworkStatus implements IText {
 
     /**
      * @param player 待检测玩家
-     * @param level 0(op, 公开, 拥有者, 成员) 1(op, 拥有者, 成员) 2(op, 拥有者)
+     * @param level 0(op, 拥有者, 管理员, 成员, 公开) 1(op, 拥有者, 管理员, 成员) 2(op, 拥有者, 管理员) 3(op, 拥有者)
      * @return 是否有权限操作以及维度判断
      */
     public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
-        //todo 权限系统
         boolean isOp = Utils.isPlayerOp(player);
-        boolean isUser = this.users.contains(player.getGameProfile().getId());
+        boolean isUser = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 0;
+        boolean isAdmin = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 1;
+        boolean isOwner = this.owner.equals(player.getGameProfile().getId());
         if (!this.checkDimension(player.world.provider.getDimension())) return false;
         switch (level) {
-            case 0: return isOp || this.isPublic || player.getGameProfile().getId().equals(this.owner) || isUser;
-            case 1: return isOp || player.getGameProfile().getId().equals(this.owner) || isUser;
-            case 2: return isOp || player.getGameProfile().getId().equals(this.owner);
+            case 0:
+                return isOp || isOwner || isAdmin || isUser || this.isPublic;
+            case 1:
+                return isOp || isOwner || isAdmin || isUser;
+            case 2:
+                return isOp || isOwner || isAdmin;
+            case 3:
+                return isOp || isOwner;
             default: return false;
         }
     }

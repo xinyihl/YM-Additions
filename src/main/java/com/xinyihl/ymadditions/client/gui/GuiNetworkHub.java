@@ -4,14 +4,10 @@ import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.client.api.IListItem;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
-import com.xinyihl.ymadditions.client.control.ListItem;
-import com.xinyihl.ymadditions.client.control.MyButton;
-import com.xinyihl.ymadditions.client.control.MyLockIconButton;
-import com.xinyihl.ymadditions.client.control.MyTextField;
+import com.xinyihl.ymadditions.client.control.*;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
 import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
-import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
 import net.minecraft.client.gui.GuiTextField;
@@ -51,6 +47,9 @@ public class GuiNetworkHub extends GuiContainer {
     private GuiTextField createField;
     private boolean isCreating = false;
 
+    private IconButton netScreen;
+    private IconButton userScreen;
+
     public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
         super(containerNetworkHub);
         this.containerNetworkHub = containerNetworkHub;
@@ -67,6 +66,12 @@ public class GuiNetworkHub extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
+
+        this.netScreen = new IconButton(99998, guiLeft, guiTop - 20, 40, 146);
+        this.userScreen = new IconButton(99999, guiLeft + 20, guiTop - 20, 60, 146);
+
+        this.netScreen.setSelected(true);
+
         this.listCtrl = new ListCtrl<NetworkStatus>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
             @Override
             protected IListItem<NetworkStatus> getItem(Object id, String text, NetworkStatus o, int x, int y, int width, int height) {
@@ -118,6 +123,8 @@ public class GuiNetworkHub extends GuiContainer {
         this.createField.setMaxStringLength(10);
         this.createField.setEnableBackgroundDrawing(false);
 
+        this.buttonList.add(this.netScreen);
+        this.buttonList.add(this.userScreen);
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);
         this.buttonList.add(this.connectButton);
@@ -162,6 +169,9 @@ public class GuiNetworkHub extends GuiContainer {
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/background.png"));
+        this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+
         this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/network_hub.png"));
         this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 
@@ -170,7 +180,7 @@ public class GuiNetworkHub extends GuiContainer {
     }
 
     private NetworkStatus selected() {
-        return containerNetworkHub.networks.getOrDefault(containerNetworkHub.selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", false, new BlockPosDim(0, 0, 0, 0)));
+        return containerNetworkHub.getSelectedNetwork();
     }
 
     @Override
@@ -195,6 +205,10 @@ public class GuiNetworkHub extends GuiContainer {
             this.createField.setVisible(true);
             this.createField.setFocused(true);
             return;
+        }
+
+        if (userScreen.id == ba.id) {
+            this.mc.displayGuiScreen(new GuiNetworkHubUser(containerNetworkHub));
         }
 
         if (containerNetworkHub.selectedNetwork.equals(new UUID(0, 0))) {

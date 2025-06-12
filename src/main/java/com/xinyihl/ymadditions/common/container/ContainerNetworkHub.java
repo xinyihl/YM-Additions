@@ -36,6 +36,10 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
         this.selectedNetwork = networkHub.getNetworkUuid();
     }
 
+    public NetworkStatus getSelectedNetwork() {
+        return networks.getOrDefault(selectedNetwork, new NetworkStatus(new UUID(0, 0), "Unknown", false, new BlockPosDim(0, 0, 0, 0)));
+    }
+
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
         return playerIn.getDistanceSq(this.networkHub.getPos()) <= 64;
@@ -71,6 +75,30 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();
                 this.syncSelected((EntityPlayerMP) player);
+                this.networkHub.sync();
+                break;
+            }
+            case 2: { // 修改玩家权限
+                UUID uuid = compound.getUniqueId("user");
+                NetworkStatus network = this.storage.getNetwork(selectedNetwork);
+                if (network != null && network.hasPermission(this.player, 2)) {
+                    if (network.getOwner().equals(uuid)) {
+                        return;
+                    }
+                    Integer n = network.getUserPrem(uuid);
+                    if (n == null) {
+                        network.addUser(uuid, 0);
+                    } else if (n == 0 && network.hasPermission(this.player, 3)) {
+                        network.setUser(uuid, 1);
+                    } else if (network.hasPermission(this.player, 3)) {
+                        network.removeUser(uuid);
+                    } else {
+                        this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                    }
+                    network.setNeedTellClient(true);
+                } else {
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                }
                 this.networkHub.sync();
                 break;
             }

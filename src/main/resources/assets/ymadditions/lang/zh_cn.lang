@@ -24,6 +24,10 @@ gui.ymadditions.network_hub.info.public.true=公开: 是
 gui.ymadditions.network_hub.info.public.false=公开: 否
 gui.ymadditions.network_hub.info.state.true=状态: 已连接
 gui.ymadditions.network_hub.info.state.false=状态: 未连接
+gui.ymadditions.network_hub.user.no_selected=未选择网络
+gui.ymadditions.network_hub.user.user=成员
+gui.ymadditions.network_hub.user.admin=管理员
+gui.ymadditions.network_hub.user.owner=拥有者
 
 commands.ym.error.player_no_found=玩家不存在
 commands.ym.error.no_args=缺少参数

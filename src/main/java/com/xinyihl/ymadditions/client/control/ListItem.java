@@ -6,10 +6,11 @@ import net.minecraft.client.gui.Gui;
 
 public abstract class ListItem<T> extends Gui implements IListItem<T> {
 
-    private final Object id;
+    protected final Object id;
 
-    private final String text;
-    private final T o;
+    protected final String text;
+    protected final String tooltip;
+    protected final T o;
 
     public final int x;
     public final int y;
@@ -19,9 +20,14 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
     public boolean selected;
 
     public ListItem(Object id, String text, T o, int x, int y, int width, int height) {
+        this(id, text, "", o, x, y, width, height);
+    }
+
+    public ListItem(Object id, String text, String tooltip, T o, int x, int y, int width, int height) {
         this.id = id;
         this.o = o;
         this.text = text;
+        this.tooltip = tooltip;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -31,6 +37,11 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
     @Override
     public T get() {
         return o;
+    }
+
+    @Override
+    public String getTooltip() {
+        return tooltip;
     }
 
     @Override
