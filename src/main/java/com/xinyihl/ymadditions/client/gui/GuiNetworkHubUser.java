@@ -25,7 +25,10 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,7 +39,7 @@ public class GuiNetworkHubUser extends GuiContainer {
 
     private ListCtrl<User> listCtrl;
     private IconButton netScreen;
-    private IconButton userScreen;
+    //private IconButton userScreen;
 
     public GuiNetworkHubUser(ContainerNetworkHub containerNetworkHub) {
         super(containerNetworkHub);
@@ -45,17 +48,23 @@ public class GuiNetworkHubUser extends GuiContainer {
         this.ySize = 159;
     }
 
+    public List<Rectangle> getExtraAreas() {
+        List<Rectangle> extraAreas = new ArrayList<>();
+        extraAreas.add(new Rectangle(this.netScreen.x, this.netScreen.y, this.netScreen.width, this.netScreen.height));
+        return extraAreas;
+    }
+
     @Override
     public void initGui() {
         super.initGui();
 
-        this.netScreen = new IconButton(99998, guiLeft, guiTop - 20, 40, 146);
-        this.userScreen = new IconButton(99999, guiLeft + 20, guiTop - 20, 60, 146);
+        this.netScreen = new IconButton(99998, guiLeft + 201, guiTop + 5, 40, 146);
+        //this.userScreen = new IconButton(99999, guiLeft + 20, guiTop - 20, 60, 146);
 
-        this.userScreen.setSelected(true);
+        //this.userScreen.setSelected(true);
 
         this.buttonList.add(this.netScreen);
-        this.buttonList.add(this.userScreen);
+        //this.buttonList.add(this.userScreen);
 
 
         NetHandlerPlayClient nethandlerplayclient = this.mc.player.connection;

@@ -47,7 +47,7 @@ public class GuiNetworkHub extends GuiContainer {
     private GuiTextField createField;
     private boolean isCreating = false;
 
-    private IconButton netScreen;
+    //private IconButton netScreen;
     private IconButton userScreen;
 
     public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
@@ -59,6 +59,7 @@ public class GuiNetworkHub extends GuiContainer {
 
     public List<Rectangle> getExtraAreas() {
         List<Rectangle> extraAreas = new ArrayList<>();
+        extraAreas.add(new Rectangle(this.userScreen.x, this.userScreen.y, this.userScreen.width, this.userScreen.height));
         extraAreas.add(new Rectangle(this.lockButton.x, this.lockButton.y, this.lockButton.width, this.lockButton.height));
         return extraAreas;
     }
@@ -67,10 +68,10 @@ public class GuiNetworkHub extends GuiContainer {
     public void initGui() {
         super.initGui();
 
-        this.netScreen = new IconButton(99998, guiLeft, guiTop - 20, 40, 146);
-        this.userScreen = new IconButton(99999, guiLeft + 20, guiTop - 20, 60, 146);
+        //this.netScreen = new IconButton(99998, guiLeft + 201, guiTop - 20, 40, 146);
+        this.userScreen = new IconButton(99999, guiLeft + 201, guiTop + 5, 60, 146);
 
-        this.netScreen.setSelected(true);
+        //this.netScreen.setSelected(true);
 
         this.listCtrl = new ListCtrl<NetworkStatus>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
             @Override
@@ -104,7 +105,7 @@ public class GuiNetworkHub extends GuiContainer {
         this.deleteButton = new MyButton(996, guiLeft + 105, guiTop + 133, 37, 14, I18n.format("gui.ymadditions.network_hub.button.delete"));
         this.connectButton = new MyButton(997, guiLeft + 151, guiTop + 113, 37, 14, I18n.format("gui.ymadditions.network_hub.button.connect"));
         this.disConnectButton = new MyButton(998, guiLeft + 151, guiTop + 133, 37, 14, I18n.format("gui.ymadditions.network_hub.button.disconnect"));
-        this.lockButton = new MyLockIconButton(999, guiLeft + 201, guiTop + 12);
+        this.lockButton = new MyLockIconButton(999, guiLeft + 201, guiTop + 25);
         this.createField = new MyTextField(this.mc, 1000, this.fontRenderer, guiLeft + 105, guiTop + 113, 82, 14);
 
         if (this.containerNetworkHub.networkHub.isConnected()) {
@@ -117,13 +118,14 @@ public class GuiNetworkHub extends GuiContainer {
             this.disConnectButton.enabled = false;
         }
 
+        this.lockButton.enabled = !containerNetworkHub.selectedNetwork.equals(new UUID(0, 0));
         this.lockButton.setLocked(!this.selected().isPublic());
 
         this.createField.setVisible(false);
         this.createField.setMaxStringLength(10);
         this.createField.setEnableBackgroundDrawing(false);
 
-        this.buttonList.add(this.netScreen);
+        //this.buttonList.add(this.netScreen);
         this.buttonList.add(this.userScreen);
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);

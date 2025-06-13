@@ -1,6 +1,7 @@
 package com.xinyihl.ymadditions.common.integration.jei;
 
 import com.xinyihl.ymadditions.client.gui.GuiNetworkHub;
+import com.xinyihl.ymadditions.client.gui.GuiNetworkHubUser;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.JEIPlugin;
@@ -22,6 +23,17 @@ public class JeiPlugin implements IModPlugin {
             }
             @Override
             public List<Rectangle> getGuiExtraAreas(@Nonnull GuiNetworkHub guiContainer) {
+                return guiContainer.getExtraAreas();
+            }
+        });
+        registry.addAdvancedGuiHandlers(new IAdvancedGuiHandler<GuiNetworkHubUser>() {
+            @Nonnull
+            @Override
+            public Class<GuiNetworkHubUser> getGuiContainerClass() {
+                return GuiNetworkHubUser.class;
+            }
+            @Override
+            public List<Rectangle> getGuiExtraAreas(@Nonnull GuiNetworkHubUser guiContainer) {
                 return guiContainer.getExtraAreas();
             }
         });
