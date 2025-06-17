@@ -24,6 +24,7 @@ gui.ymadditions.network_hub.info.public.true=Public: Yes
 gui.ymadditions.network_hub.info.public.false=Public: No
 gui.ymadditions.network_hub.info.state.true=status: Connect
 gui.ymadditions.network_hub.info.state.false=status: No connect
+gui.ymadditions.network_hub.info.power=Power:
 gui.ymadditions.network_hub.user.no_selected=No network selected
 gui.ymadditions.network_hub.user.user=member
 gui.ymadditions.network_hub.user.admin=administrator

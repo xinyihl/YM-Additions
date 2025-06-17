@@ -194,7 +194,8 @@ public class GuiNetworkHub extends GuiContainer {
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isPublic()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY + 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.power") + " " + (long) (containerNetworkHub.networkHub.getPower() * 2) + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF);
     }
 
     @Override

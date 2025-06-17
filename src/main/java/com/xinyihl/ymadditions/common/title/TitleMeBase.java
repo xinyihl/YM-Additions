@@ -11,6 +11,7 @@ import appeng.me.helpers.IGridProxyable;
 import appeng.me.helpers.MachineSource;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
+import com.xinyihl.ymadditions.common.registry.Registry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -58,7 +59,7 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
                 //Ignore
             }
         } else {
-            if (this.world.isBlockLoaded(this.getPos())) {
+            if (this.world.isBlockLoaded(this.getPos()) && this.world.getBlockState(this.getPos()).getBlock() == Registry.blockNetworkHub) {
                 IBlockState state = this.world.getBlockState(this.getPos());
                 this.world.notifyBlockUpdate(this.pos, state, state, RERENDER_MAIN_THREAD);
             }

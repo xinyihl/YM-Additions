@@ -35,6 +35,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     private boolean isHead = false;
     private UUID networkUuid = new UUID(0, 0);
     private boolean isConnected = false;
+    private double power = Configurations.GENERAL_CONFIG.powerBase;
     //无需同步&保存
     private IGridConnection connection;
     private int tickCounter = 0;
@@ -107,6 +108,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         this.isHead = tag.getBoolean("isHead");
         this.networkUuid = tag.getUniqueId("networkUuid");
         this.isConnected = tag.getBoolean("isConnected");
+        this.power = tag.getDouble("power");
     }
 
     @Nonnull
@@ -116,6 +118,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         tag.setBoolean("isHead", this.isHead);
         tag.setUniqueId("networkUuid", this.networkUuid);
         tag.setBoolean("isConnected", this.isConnected);
+        tag.setDouble("power", this.power);
         return tag;
     }
 
@@ -138,7 +141,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             return;
         }
         TileNetworkHub that = (TileNetworkHub) tile;
-        double power = 0;
         if (NetHubPowerUsage.useA) {
             int dx = this.getPos().getX() - that.getPos().getX();
             int dy = this.getPos().getY() - that.getPos().getY();
@@ -196,7 +198,6 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             this.connection = null;
         }
         this.getProxy().setIdlePowerUsage(100.0D);
-        this.sync();
     }
 
     @Override
@@ -226,6 +227,10 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
 
     public void setHead(boolean head) {
         this.isHead = head;
+    }
+
+    public double getPower() {
+        return power;
     }
 
     public UUID getNetworkUuid() {
