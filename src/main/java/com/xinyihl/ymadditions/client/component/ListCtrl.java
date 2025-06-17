@@ -162,6 +162,7 @@ public abstract class ListCtrl<T extends IText> extends Gui {
         for (IListItem<T> item : this.drawItems) {
             if (item.isMouseOver(mouseX, mouseY)){
                 item.click();
+                item.playPressSound(this.mc.getSoundHandler());
                 if (isSelected) {
                     this.setSelected(item.getId());
                     r = true;

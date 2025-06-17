@@ -2,7 +2,10 @@ package com.xinyihl.ymadditions.client.control;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.init.SoundEvents;
 
 public abstract class ListItem<T> extends Gui implements IListItem<T> {
 
@@ -70,6 +73,12 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
     @Override
     public void click() {
 
+    }
+
+    @Override
+    public void playPressSound(SoundHandler soundHandlerIn)
+    {
+        soundHandlerIn.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     @Override

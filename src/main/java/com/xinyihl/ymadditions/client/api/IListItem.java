@@ -1,6 +1,7 @@
 package com.xinyihl.ymadditions.client.api;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
 
 public interface IListItem<T> {
     T get();
@@ -14,6 +15,8 @@ public interface IListItem<T> {
     Object getId();
 
     void click();
+
+    void playPressSound(SoundHandler soundHandlerIn);
 
     boolean isMouseOver(int mouseX, int mouseY);
 }
