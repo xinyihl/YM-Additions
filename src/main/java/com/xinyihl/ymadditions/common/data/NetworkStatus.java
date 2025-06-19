@@ -54,6 +54,7 @@ public class NetworkStatus implements IText {
         this.isPublic = tag.getBoolean("i");
         this.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         this.surplusChannels = tag.getInteger("sc");
+        this.users.clear();
         NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound nbt = list.getCompoundTagAt(i);
@@ -150,6 +151,7 @@ public class NetworkStatus implements IText {
      * @return 是否有权限操作以及维度判断
      */
     public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
+        if (owner.equals(new UUID(0, 0))) return true;
         boolean isOp = Utils.isPlayerOp(player);
         boolean isUser = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 0;
         boolean isAdmin = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 1;

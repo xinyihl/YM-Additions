@@ -49,7 +49,11 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
     public void update() {
         if (player.world.isRemote) return;
         if (!(player.world.getTileEntity(networkHub.getPos()) instanceof TileNetworkHub)) {
-            ((EntityPlayerMP) player).closeContainer();
+            player.closeScreen();
+            return;
+        }
+        if (!getSelectedNetwork().hasPermission(player, 0)) {
+            player.closeScreen();
         }
     }
 

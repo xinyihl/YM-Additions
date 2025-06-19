@@ -86,6 +86,7 @@ public class NetWorkSyncHandler {
         if (event.side.isClient()) return;
         if (event.phase != Phase.START) return;
         if (!(event.player instanceof EntityPlayerMP)) return;
+        if (event.player.world.getTotalWorldTime() % 10 != 0) return;
         Container container = event.player.openContainer;
         if (container instanceof IContaierTickable) {
             ((IContaierTickable) container).update();
