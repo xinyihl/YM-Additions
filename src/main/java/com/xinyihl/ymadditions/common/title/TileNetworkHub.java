@@ -68,12 +68,18 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         this.tickCounter = (this.tickCounter + 1) % 20;
         if (this.tickCounter % 20 == 0) {
             if (!this.networkUuid.equals(new UUID(0, 0))) {
+
                 DataStorage storage = DataStorage.get(this.world);
                 NetworkStatus network = storage.getNetwork(this.networkUuid);
                 if (network == null) {
                     this.unsetAll();
                     return;
                 }
+
+                if (!this.isHead && this.getPos().equals(network.getPos().toBlockPos())) {
+                    this.setHead(true);
+                }
+
                 if (this.isHead) {
                     if(this.isConnected){
                         this.setConnected(!network.getTargetPos().isEmpty());
@@ -88,15 +94,12 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
                         network.setSurplusChannels(surplusChannels);
                         network.setNeedTellClient(true);
                     }
-                } else {
-                    if (this.getPos().equals(network.getPos().toBlockPos())) {
-                        this.setHead(true);
-                    } else {
-                        if (!this.isConnected) {
-                            this.setupConnection(network);
-                        }
-                    }
                 }
+
+                if (!this.isHead && this.connection == null) {
+                    this.setupConnection(network);
+                }
+
                 this.sync();
             }
         }
