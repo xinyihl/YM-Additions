@@ -14,6 +14,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,6 +58,15 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
         }
     }
 
+    private static void userPermHelper(int tag, NetworkStatus network, UUID uuid) {
+        switch (tag){
+            case 0: network.addUser(uuid, 0); break;
+            case 1: network.setUser(uuid, 1); break;
+            case 2: network.removeUser(uuid); break;
+        }
+        network.setNeedTellClient(true);
+    }
+
     @Override
     public void onGuiAtion(NBTTagCompound compound) {
         if (this.player.world.isRemote) return;
@@ -85,23 +95,32 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
             case 2: { // 修改玩家权限
                 UUID uuid = compound.getUniqueId("user");
                 NetworkStatus network = this.storage.getNetwork(selectedNetwork);
-                if (network != null && network.hasPermission(this.player, 2)) {
+                int tag;
+                if (network != null && network.hasPermission(player, 2)) {
                     if (network.getOwner().equals(uuid)) {
                         return;
                     }
                     Integer n = network.getUserPrem(uuid);
                     if (n == null) {
-                        network.addUser(uuid, 0);
-                    } else if (n == 0 && network.hasPermission(this.player, 3)) {
-                        network.setUser(uuid, 1);
-                    } else if (network.hasPermission(this.player, 3)) {
-                        network.removeUser(uuid);
+                        tag = 0;
+                    } else if (n == 0 && network.hasPermission(player, 3)) {
+                        tag = 1;
+                    } else if (network.hasPermission(player, 3)) {
+                        tag = 2;
                     } else {
-                        this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                        tag = -1;
+                        player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                     }
                     network.setNeedTellClient(true);
                 } else {
-                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                    tag = -1;
+                    player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                }
+                if(compound.hasKey("isShifting")) {
+                    List<NetworkStatus> networks = this.storage.getPlayerNetworks(this.player);
+                    networks.forEach(network1 -> userPermHelper(tag, network1, uuid));
+                } else {
+                    userPermHelper(tag, network, uuid);
                 }
                 this.networkHub.sync();
                 break;

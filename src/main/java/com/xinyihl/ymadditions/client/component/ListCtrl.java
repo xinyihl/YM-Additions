@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.client.component;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
-import com.xinyihl.ymadditions.client.api.IText;
+import com.xinyihl.ymadditions.client.api.IShowObject;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class ListCtrl<T extends IText> extends Gui {
+public abstract class ListCtrl<T extends IShowObject> extends Gui {
 
     public final int width;
     public final int height;
@@ -117,9 +117,9 @@ public abstract class ListCtrl<T extends IText> extends Gui {
 
         for (IListItem<T> item : this.drawItems) {
             if (item.isMouseOver(mouseX, mouseY)) {
-                String tooltip = item.getTooltip();
+                List<String> tooltip = item.getTooltip();
                 if (tooltip != null && !tooltip.isEmpty()) {
-                    GuiUtils.drawHoveringText(Collections.singletonList(I18n.format(tooltip)), mouseX, mouseY, 9999, 9999, -1, mc.fontRenderer);
+                    GuiUtils.drawHoveringText(tooltip.stream().map(I18n::format).collect(Collectors.toList()), mouseX, mouseY, 9999, 9999, -1, mc.fontRenderer);
                 }
             }
         }
@@ -146,6 +146,17 @@ public abstract class ListCtrl<T extends IText> extends Gui {
                 this.scrollOffset = MathHelper.clamp(this.scrollOffset - ((int) Math.signum(mouseWheel) * (this.scrollByItem ? this.itemHeight : 3)), 0, this.maxScrollOffset);
                 this.refresh();
             }
+        }
+        if (this.isScrolling) {
+            int deltaY = mouseY - this.lastMouseY;
+            int scrollBarMaxY = this.height - this.scrollBarHeight;
+            if (this.maxScrollOffset > 0 && scrollBarMaxY > 0) {
+                float ratio = (float) this.maxScrollOffset / (float) scrollBarMaxY;
+                this.scrollOffset += (int)(deltaY * ratio);
+                this.scrollOffset = MathHelper.clamp(this.scrollOffset, 0, this.maxScrollOffset);
+            }
+            this.lastMouseY = mouseY;
+            this.refresh();
         }
     }
 
@@ -181,11 +192,11 @@ public abstract class ListCtrl<T extends IText> extends Gui {
     }
 
     public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if (this.scroll && this.isScrolling && this.maxScrollOffset > 0) {
-            this.scrollOffset = MathHelper.clamp(this.scrollOffset + mouseY - this.lastMouseY, 0, this.maxScrollOffset);
-            this.lastMouseY = mouseY;
-            this.refresh();
-        }
+//        if (this.scroll && this.isScrolling && this.maxScrollOffset > 0) {
+//            this.scrollOffset = MathHelper.clamp(this.scrollOffset + (( mouseY - this.lastMouseY )  * listHeight / scrollBarHeight), 0, this.maxScrollOffset);
+//            this.lastMouseY = mouseY;
+//            this.refresh();
+//        }
     }
 
     private boolean isMouseOverScrollBar(int mouseX, int mouseY) {

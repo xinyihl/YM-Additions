@@ -1,6 +1,6 @@
 package com.xinyihl.ymadditions.common.container;
 
-import com.xinyihl.ymadditions.client.gui.GuiNetworkHub;
+import com.xinyihl.ymadditions.client.gui.GuiNetworkHubCore;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -27,7 +27,7 @@ public class GuiHandler implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (ID == GUI_NETWORK_HUB) {
-            return new GuiNetworkHub(new ContainerNetworkHub(player, (TileNetworkHub) Objects.requireNonNull(player.world.getTileEntity(new BlockPos(x, y, z)))));
+            return new GuiNetworkHubCore(new ContainerNetworkHub(player, (TileNetworkHub) Objects.requireNonNull(player.world.getTileEntity(new BlockPos(x, y, z)))));
         }
         return null;
     }

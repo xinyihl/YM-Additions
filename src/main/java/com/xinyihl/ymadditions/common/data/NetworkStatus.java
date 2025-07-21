@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.common.data;
 
 import com.xinyihl.ymadditions.Configurations;
-import com.xinyihl.ymadditions.client.api.IText;
+import com.xinyihl.ymadditions.client.api.IShowObject;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,7 +12,7 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class NetworkStatus implements IText {
+public class NetworkStatus implements IShowObject {
     @Nonnull
     private UUID uuid = new UUID(0, 0);
     @Nonnull

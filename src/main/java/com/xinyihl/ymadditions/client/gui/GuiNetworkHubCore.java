@@ -34,7 +34,7 @@ import static com.xinyihl.ymadditions.common.network.PacketClientToServer.Client
 
 /* 由魔法数字组成的 GUI （；´д｀）ゞ */
 @SideOnly(Side.CLIENT)
-public class GuiNetworkHub extends GuiContainer {
+public class GuiNetworkHubCore extends GuiContainer {
     private static String searchNet = "";
     private final ContainerNetworkHub containerNetworkHub;
     private ListCtrl<NetworkStatus> listCtrl;
@@ -50,7 +50,7 @@ public class GuiNetworkHub extends GuiContainer {
     //private IconButton netScreen;
     private IconButton userScreen;
 
-    public GuiNetworkHub(ContainerNetworkHub containerNetworkHub) {
+    public GuiNetworkHubCore(ContainerNetworkHub containerNetworkHub) {
         super(containerNetworkHub);
         this.containerNetworkHub = containerNetworkHub;
         this.xSize = 200;

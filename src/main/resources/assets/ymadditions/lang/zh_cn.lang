@@ -29,6 +29,7 @@ gui.ymadditions.network_hub.user.no_selected=未选择网络
 gui.ymadditions.network_hub.user.user=成员
 gui.ymadditions.network_hub.user.admin=管理员
 gui.ymadditions.network_hub.user.owner=拥有者
+gui.ymadditions.network_hub.user.tooltip=按住 Shift 操作所有拥有权限的网络
 
 commands.ym.error.player_no_found=玩家不存在
 commands.ym.error.no_args=缺少参数

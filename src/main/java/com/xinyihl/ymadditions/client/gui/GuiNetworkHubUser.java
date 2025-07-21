@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.client.api.IListItem;
-import com.xinyihl.ymadditions.client.api.IText;
+import com.xinyihl.ymadditions.client.api.IShowObject;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.IconButton;
 import com.xinyihl.ymadditions.client.control.ListItem;
@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -95,17 +96,22 @@ public class GuiNetworkHubUser extends GuiContainer {
                     }
 
                     @Override
-                    public String getTooltip() {
+                    public List<String> getTooltip() {
+                        List<String> tooltip = new ArrayList<>();
+                        if (get().getPerm() == -1) {
+                            tooltip.add("gui.ymadditions.network_hub.user.user");
+                        }
                         if (get().getPerm() == 0) {
-                            return "gui.ymadditions.network_hub.user.user";
+                            tooltip.add("gui.ymadditions.network_hub.user.user");
                         }
                         if (get().getPerm() == 1) {
-                            return "gui.ymadditions.network_hub.user.admin";
+                            tooltip.add("gui.ymadditions.network_hub.user.admin");
                         }
                         if (get().getPerm() == 2) {
-                            return "gui.ymadditions.network_hub.user.owner";
+                            tooltip.add("gui.ymadditions.network_hub.user.owner");
                         }
-                        return "";
+                        tooltip.add("gui.ymadditions.network_hub.user.tooltip");
+                        return tooltip;
                     }
 
                     @Override
@@ -113,6 +119,9 @@ public class GuiNetworkHubUser extends GuiContainer {
                         NBTTagCompound tag = new NBTTagCompound();
                         tag.setInteger("button", 2);
                         tag.setUniqueId("user", get().getId());
+                        if(Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_LSHIFT) {
+                            tag.setBoolean("isShifting", true);
+                        }
                         YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
                     }
                 };
@@ -154,7 +163,7 @@ public class GuiNetworkHubUser extends GuiContainer {
         this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/background.png"));
         this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 
-//        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/network_hub.png"));
+//        this.mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/network_hub_user.png"));
 //        this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 
         GlStateManager.disableBlend();
@@ -170,7 +179,7 @@ public class GuiNetworkHubUser extends GuiContainer {
     @Override
     protected void actionPerformed(@Nonnull GuiButton ba) {
         if (netScreen.id == ba.id) {
-            this.mc.displayGuiScreen(new GuiNetworkHub(containerNetworkHub));
+            this.mc.displayGuiScreen(new GuiNetworkHubCore(containerNetworkHub));
         }
     }
 
@@ -200,7 +209,7 @@ public class GuiNetworkHubUser extends GuiContainer {
         listCtrl.mouseReleased(mouseX, mouseY, state);
     }
 
-    private static class User extends NetworkPlayerInfo implements IText {
+    private static class User extends NetworkPlayerInfo implements IShowObject {
 
         private final NetworkStatus net;
 

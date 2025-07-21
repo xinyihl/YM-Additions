@@ -7,12 +7,15 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.init.SoundEvents;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class ListItem<T> extends Gui implements IListItem<T> {
 
     protected final Object id;
 
     protected final String text;
-    protected final String tooltip;
+    protected final List<String> tooltip;
     protected final T o;
 
     public final int x;
@@ -23,10 +26,10 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
     public boolean selected;
 
     public ListItem(Object id, String text, T o, int x, int y, int width, int height) {
-        this(id, text, "", o, x, y, width, height);
+        this(id, text, Collections.emptyList(), o, x, y, width, height);
     }
 
-    public ListItem(Object id, String text, String tooltip, T o, int x, int y, int width, int height) {
+    public ListItem(Object id, String text, List<String> tooltip, T o, int x, int y, int width, int height) {
         this.id = id;
         this.o = o;
         this.text = text;
@@ -43,7 +46,7 @@ public abstract class ListItem<T> extends Gui implements IListItem<T> {
     }
 
     @Override
-    public String getTooltip() {
+    public List<String> getTooltip() {
         return tooltip;
     }
 

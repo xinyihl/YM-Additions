@@ -29,6 +29,7 @@ gui.ymadditions.network_hub.user.no_selected=No network selected
 gui.ymadditions.network_hub.user.user=member
 gui.ymadditions.network_hub.user.admin=administrator
 gui.ymadditions.network_hub.user.owner=owner
+gui.ymadditions.network_hub.user.tooltip=Shift
 
 commands.ym.error.player_no_found=Player not found
 commands.ym.error.no_args=Missing arguments
