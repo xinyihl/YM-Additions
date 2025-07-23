@@ -6,13 +6,16 @@ import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.api.IContaierTickable;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkUser;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -20,6 +23,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,10 +59,23 @@ public class NetWorkSyncHandler {
         NBTTagCompound tag = new NBTTagCompound();
         NBTTagList list = new NBTTagList();
         for (NetworkStatus network : networks) {
-            list.appendTag(network.writeToNBT(new NBTTagCompound()));
+            list.appendTag(addOnlinePlayers(network).writeToNBT(new NBTTagCompound()));
         }
         tag.setTag("networks", list);
         return tag;
+    }
+
+    private static NetworkStatus addOnlinePlayers(NetworkStatus network) {
+        NetworkStatus copy = network.deepCopy();
+        List<NetworkUser> users = copy.getUsers();
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        if (server != null) {
+            Arrays.stream(server.getPlayerList().getOnlinePlayerProfiles())
+                    .map(gameProfile -> new NetworkUser(NetworkUser.Perm.NONE, gameProfile.getId(), gameProfile.getName()))
+                    .filter(user -> !users.contains(user))
+                    .forEach(users::add);
+        }
+        return copy;
     }
 
     @SubscribeEvent

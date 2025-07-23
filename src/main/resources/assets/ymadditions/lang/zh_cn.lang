@@ -26,9 +26,10 @@ gui.ymadditions.network_hub.info.state.true=状态: 已连接
 gui.ymadditions.network_hub.info.state.false=状态: 未连接
 gui.ymadditions.network_hub.info.power=耗电:
 gui.ymadditions.network_hub.user.no_selected=未选择网络
+gui.ymadditions.network_hub.user.none=访客
 gui.ymadditions.network_hub.user.user=成员
 gui.ymadditions.network_hub.user.admin=管理员
-gui.ymadditions.network_hub.user.owner=拥有者
+gui.ymadditions.network_hub.user.owner=创建者
 gui.ymadditions.network_hub.user.tooltip=按住 Shift 操作所有拥有权限的网络
 
 commands.ym.error.player_no_found=玩家不存在

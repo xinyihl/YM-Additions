@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkUser;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -80,7 +81,7 @@ public class YMCommand extends CommandBase {
         }
 
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
-            networkStatus.addUser(player.getId(), 0);
+            networkStatus.addUser(((EntityPlayer) sender).getGameProfile().getId(), ((EntityPlayer) sender).getGameProfile().getName(), NetworkUser.Perm.USER);
             networkStatus.setNeedTellClient(true);
             sender.sendMessage(new TextComponentTranslation("commands.ym.info.add_success"));
         } else {
@@ -133,7 +134,8 @@ public class YMCommand extends CommandBase {
         }
         if (networkStatus.hasPermission((EntityPlayer) sender, 2)) {
             sender.sendMessage(new TextComponentString("Users:"));
-            networkStatus.getUsers().forEach(user -> sender.sendMessage(new TextComponentString(server.getPlayerProfileCache().getProfileByUUID(user).getName())));
+            networkStatus.getUsers().forEach(user -> sender.sendMessage(new TextComponentString(user.getName())));
+            //server.getPlayerProfileCache().getProfileByUUID(user).getName()
         } else {
             throw new CommandException("commands.ym.error.no_perm_network");
         }

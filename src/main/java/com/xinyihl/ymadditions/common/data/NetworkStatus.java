@@ -18,7 +18,7 @@ public class NetworkStatus implements IShowObject {
     @Nonnull
     private UUID owner = new UUID(0, 0);
     @Nonnull
-    private final Map<UUID, Integer> users = new HashMap<>();
+    private final List<NetworkUser> users = new ArrayList<>();
     @Nonnull
     private String networkName = "Unknown";
     private boolean isPublic = false;
@@ -42,24 +42,42 @@ public class NetworkStatus implements IShowObject {
     }
 
     public static NetworkStatus readFromNBT(NBTTagCompound tag) {
-        NetworkStatus networkStatus = new NetworkStatus();
-        networkStatus.updateFromNBT(tag);
-        return networkStatus;
+        NetworkStatus network = new NetworkStatus();
+        network.uuid = Objects.requireNonNull(tag.getUniqueId("u"));
+        network.owner = Objects.requireNonNull(tag.getUniqueId("o"));
+        network.networkName = tag.getString("n");
+        network.isPublic = tag.getBoolean("i");
+        network.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
+        network.surplusChannels = tag.getInteger("sc");
+        NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound nbt = list.getCompoundTagAt(i);
+            network.users.add(NetworkUser.readFromNBT(nbt.getCompoundTag("n")));
+        }
+        return network;
     }
 
-    public void updateFromNBT(NBTTagCompound tag) {
+    public NetworkStatus updateFromNBT(NBTTagCompound tag) {
         this.uuid = Objects.requireNonNull(tag.getUniqueId("u"));
         this.owner = Objects.requireNonNull(tag.getUniqueId("o"));
         this.networkName = tag.getString("n");
         this.isPublic = tag.getBoolean("i");
         this.pos = BlockPosDim.readFromNBT(tag.getCompoundTag("p"));
         this.surplusChannels = tag.getInteger("sc");
-        this.users.clear();
+        Set<NetworkUser> change = new HashSet<>();
         NBTTagList list = tag.getTagList("us", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound nbt = list.getCompoundTagAt(i);
-            this.users.put(nbt.getUniqueId("u"), nbt.getInteger("v"));
+            NetworkUser user = NetworkUser.readFromNBT(nbt.getCompoundTag("n"));
+            change.add(user);
+            if (this.users.contains(user)){
+                this.users.get(this.users.indexOf(user)).updateFromNBT(nbt.getCompoundTag("n"));
+            } else {
+                this.users.add(user);
+            }
         }
+        this.users.removeIf(e -> !change.contains(e));
+        return this;
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
@@ -70,10 +88,9 @@ public class NetworkStatus implements IShowObject {
         tag.setTag("p", this.pos.writeToNBT(new NBTTagCompound()));
         tag.setInteger("sc", this.surplusChannels);
         NBTTagList list = new NBTTagList();
-        for (Map.Entry<UUID, Integer> entry : this.users.entrySet()) {
+        for (NetworkUser user : this.users) {
             NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setUniqueId("u", entry.getKey());
-            nbt.setInteger("v", entry.getValue());
+            nbt.setTag("n", user.writeToNBT(new NBTTagCompound()));
             list.appendTag(nbt);
         }
         tag.setTag("us", list);
@@ -113,24 +130,29 @@ public class NetworkStatus implements IShowObject {
         return targetPos;
     }
 
-    public Set<UUID> getUsers() {
-        return users.keySet();
+    public List<NetworkUser> getUsers() {
+        return users;
     }
 
-    public Integer getUserPrem(UUID uuid) {
-        return users.get(uuid);
+    public NetworkUser.Perm getUserPrem(UUID uuid) {
+        NetworkUser user = users.stream().filter(user1 -> user1.getUuid().equals(uuid)).findFirst().orElse(null);
+        return user == null ? null : user.getPerm();
     }
 
     public void removeUser(UUID uuid) {
-        this.users.remove(uuid);
+        this.users.removeIf(user -> user.getUuid().equals(uuid));
     }
 
-    public void addUser(UUID uuid, int perm) {
-        this.users.put(uuid, perm);
+    public void addUser(UUID uuid, String name, NetworkUser.Perm perm) {
+        this.users.add(new NetworkUser(perm, uuid, name));
     }
 
-    public void setUser(UUID uuid, int perm) {
-        this.users.replace(uuid, perm);
+    public void setUserPrem(UUID uuid, NetworkUser.Perm perm) {
+        NetworkUser user = users.stream().filter(user1 -> user1.getUuid().equals(uuid)).findFirst().orElse(null);
+        if (user == null) {
+            return;
+        }
+        user.setPerm(perm);
     }
 
     public void addTargetPos(@Nonnull BlockPosDim pos) {
@@ -153,9 +175,10 @@ public class NetworkStatus implements IShowObject {
     public boolean hasPermission(@Nonnull EntityPlayer player, int level) {
         if (owner.equals(new UUID(0, 0))) return true;
         boolean isOp = Utils.isPlayerOp(player);
-        boolean isUser = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 0;
-        boolean isAdmin = this.users.getOrDefault(player.getGameProfile().getId(), -1) == 1;
-        boolean isOwner = this.owner.equals(player.getGameProfile().getId());
+        NetworkUser user = this.users.stream().filter(user1 -> user1.getUuid().equals(player.getGameProfile().getId())).findFirst().orElse(null);
+        boolean isUser = user != null && user.getPerm() == NetworkUser.Perm.USER;
+        boolean isAdmin = user != null && user.getPerm() == NetworkUser.Perm.ADMIN;
+        boolean isOwner = user != null && user.getPerm() == NetworkUser.Perm.OWNER;
         if (!this.checkDimension(player.world.provider.getDimension())) return false;
         switch (level) {
             case 0:
@@ -209,6 +232,10 @@ public class NetworkStatus implements IShowObject {
 
     public void setNeedTellClient(boolean needTellClient) {
         this.needTellClient = needTellClient;
+    }
+
+    public NetworkStatus deepCopy() {
+        return NetworkStatus.readFromNBT(this.writeToNBT(new NBTTagCompound()));
     }
 
     @Override

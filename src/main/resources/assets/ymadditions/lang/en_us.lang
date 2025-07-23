@@ -26,9 +26,10 @@ gui.ymadditions.network_hub.info.state.true=status: Connect
 gui.ymadditions.network_hub.info.state.false=status: No connect
 gui.ymadditions.network_hub.info.power=Power:
 gui.ymadditions.network_hub.user.no_selected=No network selected
-gui.ymadditions.network_hub.user.user=member
-gui.ymadditions.network_hub.user.admin=administrator
-gui.ymadditions.network_hub.user.owner=owner
+gui.ymadditions.network_hub.user.none=Guest
+gui.ymadditions.network_hub.user.user=Member
+gui.ymadditions.network_hub.user.admin=Admin
+gui.ymadditions.network_hub.user.owner=Owner
 gui.ymadditions.network_hub.user.tooltip=Shift
 
 commands.ym.error.player_no_found=Player not found

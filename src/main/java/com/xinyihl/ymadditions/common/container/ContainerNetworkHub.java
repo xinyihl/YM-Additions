@@ -5,6 +5,7 @@ import com.xinyihl.ymadditions.common.api.IContaierTickable;
 import com.xinyihl.ymadditions.common.api.IInputHandler;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.data.NetworkStatus;
+import com.xinyihl.ymadditions.common.data.NetworkUser;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
@@ -56,12 +57,13 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
         if (!getSelectedNetwork().hasPermission(player, 0)) {
             player.closeScreen();
         }
+        getSelectedNetwork().setNeedTellClient(true);
     }
 
-    private static void userPermHelper(int tag, NetworkStatus network, UUID uuid) {
+    private static void userPermHelper(int tag, NetworkStatus network, UUID uuid, String name) {
         switch (tag){
-            case 0: network.addUser(uuid, 0); break;
-            case 1: network.setUser(uuid, 1); break;
+            case 0: network.addUser(uuid, name, NetworkUser.Perm.USER); break;
+            case 1: network.setUserPrem(uuid, NetworkUser.Perm.ADMIN); break;
             case 2: network.removeUser(uuid); break;
         }
         network.setNeedTellClient(true);
@@ -85,6 +87,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 String name = compound.getString("name");
                 NetworkStatus network = this.storage.addNetwork(new NetworkStatus(player.getGameProfile().getId(), name, false, new BlockPosDim(networkHub.getPos(), networkHub.getWorld().provider.getDimension()) ));
                 network.setNeedTellClient(true);
+                network.addUser(player.getGameProfile().getId(), player.getGameProfile().getName(), NetworkUser.Perm.OWNER);
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();
@@ -94,33 +97,36 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
             }
             case 2: { // 修改玩家权限
                 UUID uuid = compound.getUniqueId("user");
+                String name = compound.getString("name");
                 NetworkStatus network = this.storage.getNetwork(selectedNetwork);
                 int tag;
                 if (network != null && network.hasPermission(player, 2)) {
                     if (network.getOwner().equals(uuid)) {
                         return;
                     }
-                    Integer n = network.getUserPrem(uuid);
-                    if (n == null) {
+                    NetworkUser.Perm n = network.getUserPrem(uuid);
+                    if (n == null && network.hasPermission(player, 2)) {
                         tag = 0;
-                    } else if (n == 0 && network.hasPermission(player, 3)) {
+                    } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 3)) {
                         tag = 1;
-                    } else if (network.hasPermission(player, 3)) {
+                    } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 2)) {
                         tag = 2;
-                    } else {
+                    } else if (n == NetworkUser.Perm.ADMIN && network.hasPermission(player, 3)) {
+                        tag = 2;
+                    }
+                    else {
                         tag = -1;
                         player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                     }
-                    network.setNeedTellClient(true);
                 } else {
                     tag = -1;
                     player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
                 if(compound.hasKey("isShifting")) {
                     List<NetworkStatus> networks = this.storage.getPlayerNetworks(this.player);
-                    networks.forEach(network1 -> userPermHelper(tag, network1, uuid));
+                    networks.forEach(network1 -> userPermHelper(tag, network1, uuid, name));
                 } else {
-                    userPermHelper(tag, network, uuid);
+                    userPermHelper(tag, network, uuid, name);
                 }
                 this.networkHub.sync();
                 break;
