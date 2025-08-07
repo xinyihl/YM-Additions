@@ -91,6 +91,7 @@ public class GuiNetworkHubCore extends GuiContainer {
         this.listCtrl.setIsSelected(true);
         this.listCtrl.setFilter(searchNet);
         this.listCtrl.setSelected(containerNetworkHub.selectedNetwork);
+        this.listCtrl.setScrollByItem(true);
         this.listCtrl.refresh();
 
         this.searchField = new GuiTextField(1001, this.fontRenderer, guiLeft + 9, guiTop + 17, 85, 11);

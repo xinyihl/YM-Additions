@@ -124,6 +124,7 @@ public class GuiNetworkHubUser extends GuiContainer {
 
 
         this.listCtrl.setScroll(true);
+        this.listCtrl.setScrollByItem(true);
         this.listCtrl.refresh();
 
     }
