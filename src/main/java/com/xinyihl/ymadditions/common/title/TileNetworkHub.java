@@ -138,6 +138,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
         if (this.world.isRemote) return;
         BlockPosDim pos = network.getPos();
         World thatWorld = DimensionManager.getWorld(pos.getDimension());
+        if (!thatWorld.isBlockLoaded(pos.toBlockPos())) return;
         TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
         if (!(tile instanceof TileNetworkHub)) {
             DataStorage.get(thatWorld).removeNetwork(this.networkUuid);
