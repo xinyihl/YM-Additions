@@ -1,6 +1,6 @@
 package com.xinyihl.ymadditions.client.api;
 
-public interface IShowObject {
+public interface IListObject {
     Object getId();
     String getText();
 }

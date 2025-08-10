@@ -49,7 +49,7 @@ public class NetWorkSyncHandler {
     private static void initSyncDate(EntityPlayerMP player){
         World world = player.world;
         DataStorage storage = DataStorage.get(world);
-        List<NetworkStatus> networks = storage.getPlayerNetworks(player);
+        List<NetworkStatus> networks = storage.getPlayerNetworks(player, 0);
         if (!networks.isEmpty()) {
             YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(INIT_NETWORKS, networksToNBT(networks)), player);
         }

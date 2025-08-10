@@ -1,13 +1,13 @@
 package com.xinyihl.ymadditions.common.data;
 
 import com.mojang.authlib.GameProfile;
-import com.xinyihl.ymadditions.client.api.IShowObject;
+import com.xinyihl.ymadditions.client.api.IListObject;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class NetworkUser implements IShowObject {
+public class NetworkUser implements IListObject {
 
     private int perm;
 
@@ -40,10 +40,6 @@ public class NetworkUser implements IShowObject {
         tag.setUniqueId("u", this.uuid);
         tag.setString("n", this.name);
         return tag;
-    }
-
-    public GameProfile getProfile() {
-        return new GameProfile(this.uuid, this.name);
     }
 
     public Perm getPerm() {

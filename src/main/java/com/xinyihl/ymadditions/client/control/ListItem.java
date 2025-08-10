@@ -1,6 +1,7 @@
 package com.xinyihl.ymadditions.client.control;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
+import com.xinyihl.ymadditions.client.api.IListObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
@@ -10,7 +11,7 @@ import net.minecraft.init.SoundEvents;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class ListItem<T> extends Gui implements IListItem<T> {
+public abstract class ListItem<T extends IListObject> extends Gui implements IListItem<T> {
 
     protected final Object id;
 

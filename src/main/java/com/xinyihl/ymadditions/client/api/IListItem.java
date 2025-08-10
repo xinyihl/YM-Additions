@@ -5,7 +5,7 @@ import net.minecraft.client.audio.SoundHandler;
 
 import java.util.List;
 
-public interface IListItem<T> {
+public interface IListItem<T extends IListObject> {
     T get();
 
     List<String> getTooltip();

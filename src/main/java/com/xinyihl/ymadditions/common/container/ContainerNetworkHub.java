@@ -60,11 +60,21 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
         getSelectedNetwork().setNeedTellClient(true);
     }
 
-    private static void userPermHelper(int tag, NetworkStatus network, UUID uuid, String name) {
-        switch (tag){
-            case 0: network.addUser(uuid, name, NetworkUser.Perm.USER); break;
-            case 1: network.setUserPrem(uuid, NetworkUser.Perm.ADMIN); break;
-            case 2: network.removeUser(uuid); break;
+    private static void userPermHelper(EntityPlayer player, NetworkStatus network, UUID uuid, String name) {
+        if (network.getOwner().equals(uuid)) {
+            return;
+        }
+        NetworkUser.Perm n = network.getUserPrem(uuid);
+        if (n == null && network.hasPermission(player, 2)) {
+            network.addUser(uuid, name, NetworkUser.Perm.USER);
+        } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 3)) {
+            network.setUserPrem(uuid, NetworkUser.Perm.ADMIN);
+        } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 2)) {
+            network.removeUser(uuid);
+        } else if (n == NetworkUser.Perm.ADMIN && network.hasPermission(player, 3)) {
+            network.removeUser(uuid);
+        } else {
+            player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
         }
         network.setNeedTellClient(true);
     }
@@ -99,34 +109,15 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 UUID uuid = compound.getUniqueId("user");
                 String name = compound.getString("name");
                 NetworkStatus network = this.storage.getNetwork(selectedNetwork);
-                int tag;
                 if (network != null && network.hasPermission(player, 2)) {
-                    if (network.getOwner().equals(uuid)) {
-                        return;
-                    }
-                    NetworkUser.Perm n = network.getUserPrem(uuid);
-                    if (n == null && network.hasPermission(player, 2)) {
-                        tag = 0;
-                    } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 3)) {
-                        tag = 1;
-                    } else if (n == NetworkUser.Perm.USER && network.hasPermission(player, 2)) {
-                        tag = 2;
-                    } else if (n == NetworkUser.Perm.ADMIN && network.hasPermission(player, 3)) {
-                        tag = 2;
-                    }
-                    else {
-                        tag = -1;
-                        player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                    if(compound.hasKey("isShifting")) {
+                        List<NetworkStatus> networks = this.storage.getPlayerNetworks(this.player, 2);
+                        networks.forEach(network1 -> userPermHelper(player, network1, uuid, name));
+                    } else {
+                        userPermHelper(player, network, uuid, name);
                     }
                 } else {
-                    tag = -1;
                     player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
-                }
-                if(compound.hasKey("isShifting")) {
-                    List<NetworkStatus> networks = this.storage.getPlayerNetworks(this.player);
-                    networks.forEach(network1 -> userPermHelper(tag, network1, uuid, name));
-                } else {
-                    userPermHelper(tag, network, uuid, name);
                 }
                 this.networkHub.sync();
                 break;

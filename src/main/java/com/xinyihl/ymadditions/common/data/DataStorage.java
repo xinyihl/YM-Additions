@@ -102,7 +102,7 @@ public class DataStorage extends WorldSavedData {
     }
 
     @Nonnull
-    public List<NetworkStatus> getPlayerNetworks(EntityPlayer player) {
-        return networks.values().stream().filter(p -> p.hasPermission(player, 0)).collect(Collectors.toList());
+    public List<NetworkStatus> getPlayerNetworks(EntityPlayer player, int level) {
+        return networks.values().stream().filter(p -> p.hasPermission(player, level)).collect(Collectors.toList());
     }
 }

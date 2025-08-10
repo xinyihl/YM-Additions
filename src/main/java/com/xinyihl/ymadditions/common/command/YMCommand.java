@@ -148,7 +148,7 @@ public class YMCommand extends CommandBase {
             return getListOfStringsMatchingLastWord(args, Arrays.asList("add", "rm", "list"));
         } else if (args.length == 2 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]) || "list".equalsIgnoreCase(args[0]))) {
             DataStorage storage = DataStorage.get(sender.getEntityWorld());
-            List<NetworkStatus> networkStatusList = storage.getPlayerNetworks((EntityPlayer) sender);
+            List<NetworkStatus> networkStatusList = storage.getPlayerNetworks((EntityPlayer) sender, 0);
             return getListOfStringsMatchingLastWord(args, networkStatusList.stream().map(NetworkStatus::getUuid).map(UUID::toString).collect(Collectors.toList()));
         } else if (args.length == 3 && ("add".equalsIgnoreCase(args[0]) || "rm".equalsIgnoreCase(args[0]))) {
             return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());

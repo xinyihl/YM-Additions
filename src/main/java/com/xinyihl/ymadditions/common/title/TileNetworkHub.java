@@ -37,9 +37,9 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
     private boolean isConnected = false;
     private double power = Configurations.GENERAL_CONFIG.powerBase;
     //无需同步&保存
-    private IGridConnection connection;
+    private IGridConnection connection = null;
     private int tickCounter = 0;
-    private int lastSurplusChannels;
+    private int lastSurplusChannels = 0;
 
     public TileNetworkHub() {
         super();

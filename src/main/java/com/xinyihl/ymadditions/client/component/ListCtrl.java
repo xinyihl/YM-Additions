@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.client.component;
 
 import com.xinyihl.ymadditions.client.api.IListItem;
-import com.xinyihl.ymadditions.client.api.IShowObject;
+import com.xinyihl.ymadditions.client.api.IListObject;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class ListCtrl<T extends IShowObject> extends Gui {
+public abstract class ListCtrl<T extends IListObject> extends Gui {
 
     public final int width;
     public final int height;
