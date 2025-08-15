@@ -110,6 +110,7 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     @Nonnull
     @Override
     public IGridNode getActionableNode() {
+        if (!proxy.isReady()) proxy.onReady();
         return proxy.getNode();
     }
 
@@ -131,7 +132,7 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     @Nullable
     @Override
     public IGridNode getGridNode(@Nonnull AEPartLocation aePartLocation) {
-        return proxy.getNode();
+        return getActionableNode();
     }
 
     @Nonnull
@@ -161,7 +162,6 @@ public abstract class TitleMeBase extends TileEntity implements IActionHost, IGr
     public void validate() {
         super.validate();
         proxy.validate();
-        proxy.onReady();
     }
 
     public void setOwner(EntityPlayer placer) {

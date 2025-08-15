@@ -96,7 +96,6 @@ public class BlockNetworkHub extends Block {
             if (te instanceof TileNetworkHub && placer instanceof EntityPlayer) {
                 TileNetworkHub tn = (TileNetworkHub) te;
                 tn.setOwner((EntityPlayer) placer);
-                tn.getActionableNode();
             }
         }
     }
