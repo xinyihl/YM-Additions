@@ -145,16 +145,7 @@ public class TileNetworkHub extends TitleMeBase implements ITickable {
             return;
         }
         TileNetworkHub that = (TileNetworkHub) tile;
-        if (NetHubPowerUsage.useA) {
-            int dx = this.getPos().getX() - that.getPos().getX();
-            int dy = this.getPos().getY() - that.getPos().getY();
-            int dz = this.getPos().getZ() - that.getPos().getZ();
-            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            power = NetHubPowerUsage.netHubPowerUsageA.apply(dist, thatWorld.provider.getDimension() != this.world.provider.getDimension());
-        } else {
-            power = NetHubPowerUsage.netHubPowerUsageB.apply(CraftTweakerMC.getIBlockPos(this.getPos()), CraftTweakerMC.getIBlockPos(that.getPos()), this.world.provider.getDimension(), thatWorld.provider.getDimension());
-        }
-
+        power = NetHubPowerUsage.calcNetHubPowerUsage(this.getPos(), that.getPos(), this.world.provider.getDimension(), thatWorld.provider.getDimension());
         try {
             this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
             this.setConnected(true);
