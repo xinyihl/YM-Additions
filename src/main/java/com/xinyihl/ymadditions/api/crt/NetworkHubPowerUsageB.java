@@ -1,4 +1,4 @@
-package com.xinyihl.ymadditions.common.api.crt;
+package com.xinyihl.ymadditions.api.crt;
 
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.world.IBlockPos;

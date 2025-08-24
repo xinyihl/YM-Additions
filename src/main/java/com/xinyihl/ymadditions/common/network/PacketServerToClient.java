@@ -1,12 +1,11 @@
 package com.xinyihl.ymadditions.common.network;
 
-import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
+import com.xinyihl.ymadditions.api.ISyncable;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -44,26 +43,16 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     public IMessage onMessage(PacketServerToClient message, MessageContext ctx) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> {
-            World world = Minecraft.getMinecraft().world;
-            DataStorage storage = DataStorage.get(world);
             switch (ServerToClient.valueOf(message.type)) {
-                case INIT_NETWORKS: {
-                    storage.readFromNBT(message.compound);
-                    break;
-                }
-                case UPDATE_NETWORKS: {
-                    storage.updateFromNBT(message.compound);
-                    break;
-                }
-                case DELETE_NETWORKS: {
-                    storage.removeNetwork(message.compound.getUniqueId("networkUuid"));
-                    break;
-                }
-                case UPDATE_GUI_SELECTED_NETWORK: {
+                case CONTAINER_SYNC: {
                     Container container = mc.player.openContainer;
-                    if (container instanceof ContainerNetworkHub) {
-                        ((ContainerNetworkHub) container).selectedNetwork = message.compound.getUniqueId("networkUuid");
+                    if (container instanceof ISyncable) {
+                        ((ISyncable) container).doSyncFrom(message.compound);
                     }
+                    break;
+                }
+                case WORLD_DATA_SYNC: {
+                    DataStorage.get(Minecraft.getMinecraft().world).doSyncFrom(message.compound);
                     break;
                 }
             }
@@ -73,9 +62,7 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     }
 
     public static enum ServerToClient {
-        INIT_NETWORKS,
-        UPDATE_NETWORKS,
-        DELETE_NETWORKS,
-        UPDATE_GUI_SELECTED_NETWORK
+        CONTAINER_SYNC,
+        WORLD_DATA_SYNC
     }
 }

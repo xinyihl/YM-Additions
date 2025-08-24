@@ -1,8 +1,11 @@
 package com.xinyihl.ymadditions.common.integration.top;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.common.api.IHasProbeInfo;
-import mcjty.theoneprobe.api.*;
+import com.xinyihl.ymadditions.api.IHasProbeInfo;
+import mcjty.theoneprobe.api.IProbeHitData;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.IProbeInfoProvider;
+import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;

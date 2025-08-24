@@ -2,12 +2,12 @@ package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.client.api.IListItem;
+import com.xinyihl.ymadditions.api.IListItem;
+import com.xinyihl.ymadditions.api.entity.User;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.IconButton;
 import com.xinyihl.ymadditions.client.control.ListItem;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
-import com.xinyihl.ymadditions.common.data.NetworkUser;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -26,6 +26,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
@@ -33,7 +34,7 @@ import static com.xinyihl.ymadditions.common.network.PacketClientToServer.Client
 public class GuiNetworkHubUser extends GuiContainer {
     private final ContainerNetworkHub containerNetworkHub;
 
-    private ListCtrl<NetworkUser> listCtrl;
+    private ListCtrl<User> listCtrl;
     private IconButton netScreen;
     //private IconButton userScreen;
 
@@ -62,20 +63,16 @@ public class GuiNetworkHubUser extends GuiContainer {
         this.buttonList.add(this.netScreen);
         //this.buttonList.add(this.userScreen);
 
-        this.listCtrl = new ListCtrl<NetworkUser>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, this.containerNetworkHub.getSelectedNetwork().getUsers()) {
+        Set<User> users = this.containerNetworkHub.getGroup().getUsers();
+        users.add(this.containerNetworkHub.getGroup().getOwner());
+        this.listCtrl = new ListCtrl<User>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, users) {
             @Override
-            protected IListItem<NetworkUser> getItem(Object id, String text, NetworkUser o, int x, int y, int width, int height) {
-                return new ListItem<NetworkUser>(id, text, o, x, y, width, height) {
+            protected IListItem<User> getItem(Object id, String text, User o, int x, int y, int width, int height) {
+                return new ListItem<User>(id, text, o, x, y, width, height) {
                     @Override
                     public void draw(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
                         int i = 1;
-                        if (get().getPerm() == NetworkUser.Perm.USER) {
-                            i = 4;
-                        }
-                        if (get().getPerm() == NetworkUser.Perm.ADMIN) {
-                            i = 5;
-                        }
-                        if (get().getPerm() == NetworkUser.Perm.OWNER) {
+                        if (get().getPerm() == User.Perm.OWNER) {
                             i = 5;
                         }
                         if (isMouseOver(mouseX, mouseY)) {
@@ -85,34 +82,41 @@ public class GuiNetworkHubUser extends GuiContainer {
                         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                         this.drawTexturedModalRect(this.x, this.y + 3, 0, i * 14, this.width / 2, 14);
                         this.drawTexturedModalRect(this.x + this.width / 2, this.y + 3, 200 - this.width / 2, i * 14, this.width / 2, 14);
-                        this.drawCenteredString(mc.fontRenderer, this.text, this.x + this.width / 2, this.y + (this.height - 8) / 2, 0xFFFFFFFF);
+                        this.drawCenteredString(mc.fontRenderer, this.text + "[" + I18n.format(this.getPermText()) + "]", this.x + this.width / 2, this.y + (this.height - 8) / 2, 0xFFFFFFFF);
                     }
 
                     @Override
                     public List<String> getTooltip() {
                         List<String> tooltip = new ArrayList<>();
-                        if (get().getPerm() == NetworkUser.Perm.NONE) {
-                            tooltip.add("gui.ymadditions.network_hub.user.none");
-                        }
-                        if (get().getPerm() == NetworkUser.Perm.USER) {
-                            tooltip.add("gui.ymadditions.network_hub.user.user");
-                        }
-                        if (get().getPerm() == NetworkUser.Perm.ADMIN) {
-                            tooltip.add("gui.ymadditions.network_hub.user.admin");
-                        }
-                        if (get().getPerm() == NetworkUser.Perm.OWNER) {
-                            tooltip.add("gui.ymadditions.network_hub.user.owner");
-                        }
-                        tooltip.add("gui.ymadditions.network_hub.user.tooltip");
+                        tooltip.add(this.getPermText());
                         return tooltip;
+                    }
+
+                    public String getPermText() {
+                        if (get().getPerm() == User.Perm.NONE) {
+                            return "gui.ymadditions.network_hub.user.none";
+                        }
+                        if (get().getPerm() == User.Perm.USER) {
+                            return "gui.ymadditions.network_hub.user.user";
+                        }
+                        if (get().getPerm() == User.Perm.ADMIN) {
+                            return "gui.ymadditions.network_hub.user.admin";
+                        }
+                        if (get().getPerm() == User.Perm.OWNER) {
+                            return "gui.ymadditions.network_hub.user.owner";
+                        }
+                        return "";
                     }
 
                     @Override
                     public void click() {
+                        UUID uuid = get().getUuid();
+                        String name = get().getName();
+                        if (uuid == null || name == null) return;
                         NBTTagCompound tag = new NBTTagCompound();
                         tag.setInteger("button", 2);
-                        tag.setUniqueId("user", get().getId());
-                        tag.setString("name", get().getName());
+                        tag.setUniqueId("user", uuid);
+                        tag.setString("name", name);
                         if(Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_LSHIFT) {
                             tag.setBoolean("isShifting", true);
                         }
@@ -139,9 +143,7 @@ public class GuiNetworkHubUser extends GuiContainer {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
-
-        boolean isSelected = !containerNetworkHub.selectedNetwork.equals(new UUID(0, 0));
-        if (isSelected) {
+        if (containerNetworkHub.selectedNetwork != null) {
             this.listCtrl.draw(mouseX, mouseY, partialTicks);
         } else {
             this.drawCenteredString(mc.fontRenderer, I18n.format("gui.ymadditions.network_hub.user.no_selected"), guiLeft + xSize / 2, 100, 0xFFFFFFFF);

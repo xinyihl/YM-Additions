@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.client.control;
 
-import com.xinyihl.ymadditions.client.api.IListItem;
-import com.xinyihl.ymadditions.client.api.IListObject;
+import com.xinyihl.ymadditions.api.IListItem;
+import com.xinyihl.ymadditions.api.IListObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;

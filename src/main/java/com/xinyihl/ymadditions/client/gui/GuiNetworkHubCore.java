@@ -2,12 +2,13 @@ package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.client.api.IListItem;
+import com.xinyihl.ymadditions.api.IListItem;
+import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.*;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
-import com.xinyihl.ymadditions.common.data.NetworkStatus;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
+import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
 import net.minecraft.client.gui.GuiTextField;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
@@ -37,7 +39,7 @@ import static com.xinyihl.ymadditions.common.network.PacketClientToServer.Client
 public class GuiNetworkHubCore extends GuiContainer {
     private static String searchNet = "";
     private final ContainerNetworkHub containerNetworkHub;
-    private ListCtrl<NetworkStatus> listCtrl;
+    private ListCtrl<Network> listCtrl;
     private GuiTextField searchField;
     private GuiLockIconButton lockButton;
     private GuiButton createButton;
@@ -73,15 +75,17 @@ public class GuiNetworkHubCore extends GuiContainer {
 
         //this.netScreen.setSelected(true);
 
-        this.listCtrl = new ListCtrl<NetworkStatus>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
+        this.listCtrl = new ListCtrl<Network>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
             @Override
-            protected IListItem<NetworkStatus> getItem(Object id, String text, NetworkStatus o, int x, int y, int width, int height) {
-                return new ListItem<NetworkStatus>(id, text, o, x, y, width, height) {
+            protected IListItem<Network> getItem(Object id, String text, Network o, int x, int y, int width, int height) {
+                return new ListItem<Network>(id, text, o, x, y, width, height) {
                     @Override
                     public void click() {
+                        UUID uuid = get().getUuid();
+                        if (uuid == null) return;
                         NBTTagCompound tag = new NBTTagCompound();
                         tag.setInteger("button", 0);
-                        tag.setUniqueId("networkUuid", get().getUuid());
+                        tag.setUniqueId("networkUuid", uuid);
                         YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
                     }
                 };
@@ -119,8 +123,8 @@ public class GuiNetworkHubCore extends GuiContainer {
             this.disConnectButton.enabled = false;
         }
 
-        this.lockButton.enabled = !containerNetworkHub.selectedNetwork.equals(new UUID(0, 0));
-        this.lockButton.setLocked(!this.selected().isPublic());
+        this.lockButton.enabled = containerNetworkHub.selectedNetwork != null;
+        this.lockButton.setLocked(!this.selected().isOvert());
 
         this.createField.setVisible(false);
         this.createField.setMaxStringLength(10);
@@ -145,10 +149,10 @@ public class GuiNetworkHubCore extends GuiContainer {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
-        boolean isSelected = !containerNetworkHub.selectedNetwork.equals(new UUID(0, 0));
+        boolean isSelected = containerNetworkHub.selectedNetwork != null;
         boolean isHead = this.containerNetworkHub.networkHub.isHead();
         boolean isConnected = this.containerNetworkHub.networkHub.isConnected();
-        this.lockButton.setLocked(!selected().isPublic());
+        this.lockButton.setLocked(!this.selected().isOvert());
         this.lockButton.enabled = isSelected;
         this.createButton.enabled = !isHead && !isConnected;
         this.disConnectButton.enabled = isSelected && !isHead && isConnected;
@@ -182,8 +186,8 @@ public class GuiNetworkHubCore extends GuiContainer {
         GlStateManager.popMatrix();
     }
 
-    private NetworkStatus selected() {
-        return containerNetworkHub.getSelectedNetwork();
+    private Network selected() {
+        return containerNetworkHub.getSelected();
     }
 
     @Override
@@ -191,10 +195,11 @@ public class GuiNetworkHubCore extends GuiContainer {
         int rightPanelX = 103;
         int rightPanelY = 19;
         this.drawCenteredString(mc.fontRenderer, I18n.format("tile.ymadditions.network_hub.name"), xSize / 2, 4, 0xFFFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getNetworkName(), rightPanelX, rightPanelY, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.selected().getSurplusChannels(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + this.selected().getPos().getDimension(), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isPublic()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getName(), rightPanelX, rightPanelY, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.containerNetworkHub.surplusChannels, rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        BlockPosDim pos = this.selected().getSendPos();
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (pos == null ? "" : pos.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isOvert()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
         this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.power") + " " + (long) (containerNetworkHub.networkHub.getPower() * 2) + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF);
     }
@@ -215,7 +220,7 @@ public class GuiNetworkHubCore extends GuiContainer {
             this.mc.displayGuiScreen(new GuiNetworkHubUser(containerNetworkHub));
         }
 
-        if (containerNetworkHub.selectedNetwork.equals(new UUID(0, 0))) {
+        if (containerNetworkHub.selectedNetwork == null) {
             return;
         }
 

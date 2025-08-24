@@ -1,8 +1,8 @@
 package com.xinyihl.ymadditions.common.integration.crt;
 
 import com.xinyihl.ymadditions.Configurations;
-import com.xinyihl.ymadditions.common.api.crt.NetworkHubPowerUsageA;
-import com.xinyihl.ymadditions.common.api.crt.NetworkHubPowerUsageB;
+import com.xinyihl.ymadditions.api.crt.NetworkHubPowerUsageA;
+import com.xinyihl.ymadditions.api.crt.NetworkHubPowerUsageB;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import net.minecraft.util.math.BlockPos;

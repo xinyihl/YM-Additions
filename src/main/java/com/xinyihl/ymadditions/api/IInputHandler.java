@@ -1,4 +1,4 @@
-package com.xinyihl.ymadditions.common.api;
+package com.xinyihl.ymadditions.api;
 
 import net.minecraft.nbt.NBTTagCompound;
 

@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.client.component;
 
-import com.xinyihl.ymadditions.client.api.IListItem;
-import com.xinyihl.ymadditions.client.api.IListObject;
+import com.xinyihl.ymadditions.api.IListItem;
+import com.xinyihl.ymadditions.api.IListObject;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -12,7 +12,10 @@ import net.minecraftforge.fml.client.config.GuiUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -98,7 +101,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        this.listHeight = (int) items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getText()).find()).count() * itemHeight;
+        this.listHeight = (int) items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getName()).find()).count() * itemHeight;
         this.maxScrollOffset = Math.max(this.listHeight - height, 0);
 
         if (this.scroll) {
@@ -128,13 +131,13 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
     public void refresh() {
         this.drawItems.clear();
         int drawSize = this.height / this.itemHeight + 2;
-        List<T> filter = this.items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getText()).find()).collect(Collectors.toList());
+        List<T> filter = this.items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getName()).find()).collect(Collectors.toList());
         for (int i = 0; i < drawSize; i++) {
             int index = this.scrollOffset / this.itemHeight + i;
             if (index >= filter.size()) break;
-            IListItem<T> item = this.getItem(filter.get(index).getId(), filter.get(index).getText(), filter.get(index), this.x, this.y + i * this.itemHeight - this.scrollOffset % this.itemHeight, this.width - (this.scroll ? scrollWidth + 2 : 0), this.itemHeight);
+            IListItem<T> item = this.getItem(filter.get(index).getUuid(), filter.get(index).getName(), filter.get(index), this.x, this.y + i * this.itemHeight - this.scrollOffset % this.itemHeight, this.width - (this.scroll ? scrollWidth + 2 : 0), this.itemHeight);
             if (isSelected)
-                item.setSelected(this.selected.equals(item.getId()));
+                item.setSelected(Objects.equals(this.selected, item.getId()));
             this.drawItems.add(item);
         }
     }

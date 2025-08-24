@@ -1,4 +1,4 @@
-package com.xinyihl.ymadditions.client.api;
+package com.xinyihl.ymadditions.api;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;

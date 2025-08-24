@@ -1,6 +1,6 @@
 package com.xinyihl.ymadditions.common.network;
 
-import com.xinyihl.ymadditions.common.api.IInputHandler;
+import com.xinyihl.ymadditions.api.IInputHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;

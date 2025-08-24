@@ -1,6 +1,5 @@
 package com.xinyihl.ymadditions;
 
-import com.xinyihl.ymadditions.common.command.YMCommand;
 import com.xinyihl.ymadditions.common.container.GuiHandler;
 import com.xinyihl.ymadditions.common.integration.top.TheOneProbe;
 import com.xinyihl.ymadditions.common.network.PacketClientToServer;
@@ -9,7 +8,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -31,10 +29,5 @@ public class YMAdditions {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         NetworkRegistry.INSTANCE.registerGuiHandler(YMAdditions.instance, new GuiHandler());
-    }
-
-    @Mod.EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new YMCommand());
     }
 }
