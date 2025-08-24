@@ -64,7 +64,8 @@ public class GuiNetworkHubUser extends GuiContainer {
         //this.buttonList.add(this.userScreen);
 
         Set<User> users = this.containerNetworkHub.getGroup().getUsers();
-        users.add(this.containerNetworkHub.getGroup().getOwner());
+        User user = this.containerNetworkHub.getGroup().getOwner();
+        if (user != null) users.add(user);
         this.listCtrl = new ListCtrl<User>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, users) {
             @Override
             protected IListItem<User> getItem(Object id, String text, User o, int x, int y, int width, int height) {
