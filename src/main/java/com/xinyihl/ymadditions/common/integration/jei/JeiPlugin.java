@@ -21,6 +21,7 @@ public class JeiPlugin implements IModPlugin {
             public Class<GuiNetworkHubCore> getGuiContainerClass() {
                 return GuiNetworkHubCore.class;
             }
+
             @Override
             public List<Rectangle> getGuiExtraAreas(@Nonnull GuiNetworkHubCore guiContainer) {
                 return guiContainer.getExtraAreas();
@@ -32,6 +33,7 @@ public class JeiPlugin implements IModPlugin {
             public Class<GuiNetworkHubUser> getGuiContainerClass() {
                 return GuiNetworkHubUser.class;
             }
+
             @Override
             public List<Rectangle> getGuiExtraAreas(@Nonnull GuiNetworkHubUser guiContainer) {
                 return guiContainer.getExtraAreas();

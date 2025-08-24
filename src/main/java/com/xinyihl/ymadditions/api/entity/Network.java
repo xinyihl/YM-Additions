@@ -4,7 +4,6 @@ import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.api.IListObject;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
-import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 

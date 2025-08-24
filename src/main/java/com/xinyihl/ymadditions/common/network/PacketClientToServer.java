@@ -51,7 +51,7 @@ public class PacketClientToServer implements IMessage, IMessageHandler<PacketCli
         return null;
     }
 
-    public static enum ClientToServer {
+    public enum ClientToServer {
         BUTTON_ACTION
     }
 }

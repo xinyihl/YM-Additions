@@ -15,7 +15,7 @@ import stanhebben.zenscript.annotations.ZenMethod;
 @ZenClass("mods.ymadditions.NetHubPowerUsage")
 public class NetHubPowerUsage {
     public static boolean useA = true;
-    public static NetworkHubPowerUsageA netHubPowerUsageA  = (context, isOtherDim) -> (Configurations.GENERAL_CONFIG.powerBase + Configurations.GENERAL_CONFIG.powerDistanceMultiplier * context * Math.log(context * context + 3)) * (isOtherDim ? Configurations.GENERAL_CONFIG.otherDimMultiplier : 1);
+    public static NetworkHubPowerUsageA netHubPowerUsageA = (context, isOtherDim) -> (Configurations.GENERAL_CONFIG.powerBase + Configurations.GENERAL_CONFIG.powerDistanceMultiplier * context * Math.log(context * context + 3)) * (isOtherDim ? Configurations.GENERAL_CONFIG.otherDimMultiplier : 1);
     public static NetworkHubPowerUsageB netHubPowerUsageB;
 
     static {
@@ -23,7 +23,7 @@ public class NetHubPowerUsage {
     }
 
     @Optional.Method(modid = "crafttweaker")
-    public static void init(){
+    public static void init() {
         netHubPowerUsageB = (a, b, ad, bd) -> {
             int dx = a.getX() - b.getX();
             int dy = a.getY() - b.getY();

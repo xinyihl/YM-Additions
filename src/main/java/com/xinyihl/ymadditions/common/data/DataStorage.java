@@ -1,12 +1,9 @@
 package com.xinyihl.ymadditions.common.data;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.YMAdditions;
-import com.xinyihl.ymadditions.api.ISyncable;
 import com.xinyihl.ymadditions.api.entity.Group;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.api.entity.User;
-import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,8 +16,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.WORLD_DATA_SYNC;
 
 public class DataStorage extends WorldSavedData {
     private final Map<UUID, Network> networks = new LinkedHashMap<>();

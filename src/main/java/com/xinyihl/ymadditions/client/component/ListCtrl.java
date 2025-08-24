@@ -25,15 +25,14 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
     public final int height;
     public final int x;
     public final int y;
-    private final int itemHeight;
     public final Minecraft mc;
-
+    private final int itemHeight;
+    private final Collection<T> items;
+    private final List<IListItem<T>> drawItems = new ArrayList<>();
     private boolean scrollByItem = false;
     private boolean scroll = false;
     private boolean isSelected = false;
-    private final Collection<T> items;
     private String filter = "";
-    private final List<IListItem<T>> drawItems = new ArrayList<>();
     private Object selected;
 
     private int scrollOffset;
@@ -45,6 +44,8 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
     private boolean isScrolling;
 
     private int scrollWidth = 3;
+    private int lastItemsSize = -1;
+    private int lastMouseY;
 
     public ListCtrl(Minecraft mc, int x, int y, int width, int height, int itemHeight, Collection<T> items) {
         this.x = x;
@@ -84,8 +85,6 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
         this.filter = Utils.escapeExprSpecialWord(filter);
     }
 
-    private int lastItemsSize = -1;
-
     public void draw(int mouseX, int mouseY, float partialTicks) {
 
         if (this.lastItemsSize != this.items.size()) {
@@ -114,7 +113,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
             if (this.maxScrollOffset > 0) {
                 this.scrollBarY += (int) ((float) this.scrollOffset / this.maxScrollOffset * (this.height - this.scrollBarHeight));
             }
-            drawRect(this.x + this.width - this.scrollWidth - 1, this.y,          this.x + this.width - 1, this.y + this.height, 0xFF9C9C9C);
+            drawRect(this.x + this.width - this.scrollWidth - 1, this.y, this.x + this.width - 1, this.y + this.height, 0xFF9C9C9C);
             drawRect(this.x + this.width - this.scrollWidth - 1, this.scrollBarY, this.x + this.width - 1, this.scrollBarY + this.scrollBarHeight, 0xFF373737);
         }
 
@@ -143,7 +142,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
     }
 
     public void handleMouseInput(int mouseX, int mouseY) {
-        if (mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height){
+        if (mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
             int mouseWheel = Mouse.getEventDWheel();
             if (mouseWheel != 0) {
                 this.scrollOffset = MathHelper.clamp(this.scrollOffset - ((int) Math.signum(mouseWheel) * (this.scrollByItem ? this.itemHeight : 3)), 0, this.maxScrollOffset);
@@ -155,7 +154,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
             int scrollBarMaxY = this.height - this.scrollBarHeight;
             if (this.maxScrollOffset > 0 && scrollBarMaxY > 0) {
                 float ratio = (float) this.maxScrollOffset / (float) scrollBarMaxY;
-                this.scrollOffset += (int)(deltaY * ratio);
+                this.scrollOffset += (int) (deltaY * ratio);
                 this.scrollOffset = MathHelper.clamp(this.scrollOffset, 0, this.maxScrollOffset);
             }
             this.lastMouseY = mouseY;
@@ -165,8 +164,6 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
 
     protected abstract IListItem<T> getItem(Object id, String text, T o, int x, int y, int width, int height);
 
-    private int lastMouseY;
-
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         if (this.scroll && !this.isScrolling && this.isMouseOverScrollBar(mouseX, mouseY)) {
             this.lastMouseY = mouseY;
@@ -174,7 +171,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
         }
         boolean r = false;
         for (IListItem<T> item : this.drawItems) {
-            if (item.isMouseOver(mouseX, mouseY)){
+            if (item.isMouseOver(mouseX, mouseY)) {
                 item.click();
                 item.playPressSound(this.mc.getSoundHandler());
                 if (isSelected) {

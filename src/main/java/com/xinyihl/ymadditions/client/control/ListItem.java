@@ -13,17 +13,14 @@ import java.util.List;
 
 public abstract class ListItem<T extends IListObject> extends Gui implements IListItem<T> {
 
-    protected final Object id;
-
-    protected final String text;
-    protected final List<String> tooltip;
-    protected final T o;
-
     public final int x;
     public final int y;
     public final int width;
     public final int height;
-
+    protected final Object id;
+    protected final String text;
+    protected final List<String> tooltip;
+    protected final T o;
     public boolean selected;
 
     public ListItem(Object id, String text, T o, int x, int y, int width, int height) {
@@ -80,14 +77,12 @@ public abstract class ListItem<T extends IListObject> extends Gui implements ILi
     }
 
     @Override
-    public void playPressSound(SoundHandler soundHandlerIn)
-    {
+    public void playPressSound(SoundHandler soundHandlerIn) {
         soundHandlerIn.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     @Override
-    public boolean isMouseOver(int mouseX, int mouseY)
-    {
+    public boolean isMouseOver(int mouseX, int mouseY) {
         return mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
     }
 }

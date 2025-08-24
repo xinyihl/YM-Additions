@@ -41,8 +41,8 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event){
-        if(event.player.world.isRemote) return;
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.player.world.isRemote) return;
         Utils.syncDataStorage((EntityPlayerMP) event.player);
     }
 

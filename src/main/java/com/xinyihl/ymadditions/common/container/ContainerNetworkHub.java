@@ -21,20 +21,18 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.CONTAINER_SYNC;
 
 public class ContainerNetworkHub extends Container implements IInputHandler, IContaierTickable, ISyncable {
 
-    public EntityPlayer player;
-    public TileNetworkHub networkHub;
     public final Map<UUID, Network> networks;
     public final Map<UUID, Group> groups;
+    public EntityPlayer player;
+    public TileNetworkHub networkHub;
     public UUID selectedNetwork;
     public DataStorage storage;
     public Integer surplusChannels;

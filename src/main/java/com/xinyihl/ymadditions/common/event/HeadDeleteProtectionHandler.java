@@ -16,13 +16,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public class HeadDeleteProtectionHandler {
     @SubscribeEvent
-    public static void onPlayerBreakEvent(BlockEvent.BreakEvent event){
+    public static void onPlayerBreakEvent(BlockEvent.BreakEvent event) {
         World world = event.getWorld();
-        if(world.isRemote) return;
+        if (world.isRemote) return;
         BlockPos pos = event.getPos();
         IBlockState state = event.getState();
         EntityPlayer player = event.getPlayer();
-        if(state.getBlock() instanceof BlockNetworkHub){
+        if (state.getBlock() instanceof BlockNetworkHub) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile instanceof TileNetworkHub) {
                 TileNetworkHub hub = (TileNetworkHub) tile;

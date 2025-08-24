@@ -61,7 +61,7 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
         return null;
     }
 
-    public static enum ServerToClient {
+    public enum ServerToClient {
         CONTAINER_SYNC,
         WORLD_DATA_SYNC
     }

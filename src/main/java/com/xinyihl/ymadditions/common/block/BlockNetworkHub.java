@@ -63,9 +63,9 @@ public class BlockNetworkHub extends Block {
 
     @Nonnull
     @Override
-    public IBlockState getActualState(@Nonnull IBlockState state,@Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos) {
+    public IBlockState getActualState(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos) {
         boolean connect = false;
-        TileEntity tile = worldIn instanceof ChunkCache ? ((ChunkCache)worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
+        TileEntity tile = worldIn instanceof ChunkCache ? ((ChunkCache) worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
         if (tile instanceof TileNetworkHub) {
             TileNetworkHub tn = (TileNetworkHub) tile;
             connect = tn.isConnected();
@@ -113,8 +113,7 @@ public class BlockNetworkHub extends Block {
     }
 
     @Override
-    public void breakBlock(World world,@Nonnull BlockPos pos,@Nonnull IBlockState state)
-    {
+    public void breakBlock(World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         if (!world.isRemote) {
             TileEntity te = world.getTileEntity(pos);
             if (te instanceof TileNetworkHub) {

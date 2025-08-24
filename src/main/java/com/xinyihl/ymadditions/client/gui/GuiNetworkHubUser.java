@@ -117,7 +117,7 @@ public class GuiNetworkHubUser extends GuiContainer {
                         tag.setInteger("button", 2);
                         tag.setUniqueId("user", uuid);
                         tag.setString("name", name);
-                        if(Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_LSHIFT) {
+                        if (Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_LSHIFT) {
                             tag.setBoolean("isShifting", true);
                         }
                         YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));

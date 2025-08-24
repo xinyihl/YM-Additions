@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 
 public class MyTextField extends GuiTextField {
     private final Minecraft mc;
+
     public MyTextField(@Nonnull Minecraft mc, int componentId, FontRenderer fontrendererObj, int x, int y, int par5Width, int par6Height) {
         super(componentId, fontrendererObj, x + 3, y + 2, par5Width, par6Height);
         this.mc = mc;

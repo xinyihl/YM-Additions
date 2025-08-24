@@ -75,11 +75,11 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
                 }
 
                 if (this.isHead) {
-                    if(this.isConnected){
+                    if (this.isConnected) {
                         this.setConnected(!network.getReceivePos().isEmpty());
                     }
                     int howMany = 0;
-                    for(IGridConnection gc : this.getActionableNode().getConnections()) {
+                    for (IGridConnection gc : this.getActionableNode().getConnections()) {
                         howMany = Math.max(gc.getUsedChannels(), howMany);
                     }
                     this.surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
@@ -136,7 +136,7 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
     public void addProbeInfo(Consumer<String> consumer, Function<String, String> loc) {
         super.addProbeInfo(consumer, loc);
         consumer.accept(loc.apply("tile_network_hub.state." + this.isConnected()));
-        if (Configurations.GENERAL_CONFIG.doNetworkUUIDShow){
+        if (Configurations.GENERAL_CONFIG.doNetworkUUIDShow) {
             UUID uuid = this.getNetworkUuid();
             consumer.accept(loc.apply("tile_network_hub.network") + " " + (uuid == null ? "Unknown" : uuid.toString()));
         }

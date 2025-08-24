@@ -12,7 +12,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public class TileTOPDataProvider implements IProbeInfoProvider {
-    public TileTOPDataProvider() { }
+    public TileTOPDataProvider() {
+    }
+
     @Override
     public String getID() {
         return Tags.MOD_ID + ":" + this.getClass().getSimpleName();
