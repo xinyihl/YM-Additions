@@ -11,56 +11,40 @@ import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.network.PacketServerToClient;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
-import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.util.Constants;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.CONTAINER_SYNC;
 
 public class ContainerNetworkHub extends Container implements IInputHandler, IContaierTickable, ISyncable {
 
-    public final Map<UUID, Network> networks;
-    public final Map<UUID, Group> groups;
     public EntityPlayer player;
     public TileNetworkHub networkHub;
     public UUID selectedNetwork;
     public DataStorage storage;
     public Integer surplusChannels;
+    public Map<UUID, Network> networks = new LinkedHashMap<>();
+    public Map<UUID, Group> groups = new LinkedHashMap<>();
 
     public ContainerNetworkHub(EntityPlayer player, TileNetworkHub networkHub) {
         this.player = player;
         this.networkHub = networkHub;
+        if (player.world.isRemote) return;
         this.storage = DataStorage.get(networkHub.getWorld());
         this.networks = storage.getNetworks();
         this.groups = storage.getGroups();
         this.selectedNetwork = networkHub.getNetworkUuid();
-        if (networkHub.isHead()) {
-            this.surplusChannels = networkHub.getSurplusChannels();
-        } else if (this.selectedNetwork != null) {
-            BlockPosDim pos = getSelected().getSendPos();
-            if (pos != null) {
-                World thatWorld = DimensionManager.getWorld(pos.getDimension());
-                if (thatWorld != null && thatWorld.isBlockLoaded(pos.toBlockPos())) {
-                    TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
-                    if (tile instanceof TileNetworkHub) {
-                        TileNetworkHub that = (TileNetworkHub) tile;
-                        this.surplusChannels = that.getSurplusChannels();
-                    }
-                }
-            }
-        } else {
-            this.surplusChannels = 0;
-        }
     }
 
     public Network getSelected() {
@@ -86,6 +70,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
         if (!getSelected().hasPermission(player, User.Perm.USER)) {
             player.closeScreen();
         }
+        this.sync();
     }
 
     @Override
@@ -108,9 +93,9 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
                 this.selectedNetwork = network.getUuid();
-                this.sync();
+                this.storage.markDirty();
                 this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
+                this.sync();
                 break;
             }
             case 2: { // 修改玩家权限
@@ -120,8 +105,8 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 if (group != null && group.hasPermission(player, User.Perm.ADMIN)) {
                     User user = group.getUser(User.create(uuid, name));
                     if (user != null) {
-                        if (user.getPerm() == User.Perm.NONE) {
-                            user.setPerm(User.Perm.USER);
+                        if (user.getPerm() == User.Perm.ADMIN && group.hasPermission(player, User.Perm.OWNER)) {
+                            group.removeUser(user);
                         }
                         if (user.getPerm() == User.Perm.USER) {
                             if (group.hasPermission(player, User.Perm.OWNER)) {
@@ -130,15 +115,18 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                                 group.removeUser(user);
                             }
                         }
-                        if (user.getPerm() == User.Perm.ADMIN && group.hasPermission(player, User.Perm.OWNER)) {
-                            group.removeUser(user);
+                        if (user.getPerm() == User.Perm.NONE) {
+                            user.setPerm(User.Perm.USER);
                         }
+                    } else {
+                        group.addUser(User.create(uuid, name, User.Perm.USER));
                     }
+                    this.storage.markDirty();
+                    this.networkHub.sync();
+                    this.sync();
                 } else {
                     player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
-                this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
                 break;
             }
             case 996: { // 删除网络
@@ -146,12 +134,12 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 if (network != null && network.hasPermission(this.player, User.Perm.ADMIN)) {
                     storage.removeNetwork(this.selectedNetwork);
                     this.selectedNetwork = Objects.equals(selectedNetwork, networkHub.getNetworkUuid()) ? null : networkHub.getNetworkUuid();
+                    this.storage.markDirty();
+                    this.networkHub.sync();
                     this.sync();
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
-                this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
                 break;
             }
             case 997: { // 连接网络
@@ -160,36 +148,38 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                     if (!Objects.equals(selectedNetwork, networkHub.getNetworkUuid())) {
                         this.networkHub.breakConnection();
                     }
+                    this.storage.markDirty();
                     this.networkHub.setNetworkUuid(this.selectedNetwork);
+                    this.networkHub.sync();
+                    this.sync();
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
-                this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
                 break;
             }
             case 998: { // 断开连接
                 Network network = this.storage.getNetwork(this.networkHub.getNetworkUuid());
                 if (network != null && network.hasPermission(this.player, User.Perm.USER)) {
                     this.networkHub.breakConnection();
-                    this.selectedNetwork = new UUID(0, 0);
+                    this.selectedNetwork = null;
+                    this.storage.markDirty();
+                    this.networkHub.sync();
                     this.sync();
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
-                this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
                 break;
             }
             case 999: { // 切换网络是否公开
                 Network network = this.storage.getNetwork(selectedNetwork);
                 if (network != null && network.hasPermission(this.player, User.Perm.ADMIN)) {
                     network.setOvert(!network.isOvert());
+                    this.storage.markDirty();
+                    this.networkHub.sync();
+                    this.sync();
                 } else {
                     this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }
-                this.networkHub.sync();
-                Utils.syncDataStorage((EntityPlayerMP) player);
                 break;
             }
         }
@@ -197,17 +187,83 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
 
     @Override
     public void sync() {
+        if (networkHub.isHead()) {
+            this.surplusChannels = networkHub.getSurplusChannels();
+        } else if (this.selectedNetwork != null) {
+            BlockPosDim pos = getSelected().getSendPos();
+            if (pos != null) {
+                World thatWorld = DimensionManager.getWorld(pos.getDimension());
+                if (thatWorld != null && thatWorld.isBlockLoaded(pos.toBlockPos())) {
+                    TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
+                    if (tile instanceof TileNetworkHub) {
+                        TileNetworkHub that = (TileNetworkHub) tile;
+                        this.surplusChannels = that.getSurplusChannels();
+                    }
+                }
+            }
+        }
         YMAdditions.instance.networkWrapper.sendTo(new PacketServerToClient(CONTAINER_SYNC, this.getSyncData(new NBTTagCompound())), (EntityPlayerMP) player);
     }
 
     @Override
     public NBTTagCompound getSyncData(NBTTagCompound tag) {
         if (this.selectedNetwork != null) tag.setUniqueId("networkUuid", this.selectedNetwork);
+        if (this.surplusChannels != null) tag.setInteger("surplusChannels", this.surplusChannels);
+        NBTTagList list1 = new NBTTagList();
+        NBTTagList list2 = new NBTTagList();
+        for (Network network : this.networks.values().stream().filter(v -> v.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
+            list1.appendTag(network.to(new NBTTagCompound()));
+        }
+        for (Group group : this.groups.values().stream().filter(u -> u.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
+            list2.appendTag(group.deepCopy().injectOnlinePlayers().injectOwnerToUsers().to(new NBTTagCompound()));
+        }
+        tag.setTag("networks", list1);
+        tag.setTag("groups", list2);
         return tag;
     }
 
     @Override
     public void doSyncFrom(NBTTagCompound tag) {
         this.selectedNetwork = tag.hasUniqueId("networkUuid") ? tag.getUniqueId("networkUuid") : null;
+        this.surplusChannels = tag.hasKey("surplusChannels") ? tag.getInteger("surplusChannels") : null;
+        this.updateNetworks(tag);
+        this.updateGroups(tag);
+    }
+
+    private void updateNetworks(NBTTagCompound tag) {
+        NBTTagList list = tag.getTagList("networks", Constants.NBT.TAG_COMPOUND);
+        Set<UUID> uuidsToKeep = new HashSet<>();
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound nbt = list.getCompoundTagAt(i);
+            UUID uuid = nbt.getUniqueId("uuid");
+            uuidsToKeep.add(uuid);
+
+            Network net = this.networks.get(uuid);
+            if (net != null) {
+                net.update(nbt);
+            } else {
+                Network newNet = Network.create(nbt);
+                this.networks.put(newNet.getUuid(), newNet);
+            }
+        }
+        this.networks.keySet().removeIf(uuid -> !uuidsToKeep.contains(uuid));
+    }
+
+    private void updateGroups(NBTTagCompound tag) {
+        NBTTagList list = tag.getTagList("groups", Constants.NBT.TAG_COMPOUND);
+        Set<UUID> uuidsToKeep = new HashSet<>();
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound nbt = list.getCompoundTagAt(i);
+            UUID uuid = nbt.getUniqueId("uuid");
+            uuidsToKeep.add(uuid);
+            Group group = this.groups.get(uuid);
+            if (group != null) {
+                group.update(nbt);
+            } else {
+                Group newGroup = Group.create(nbt);
+                this.groups.put(newGroup.getUuid(), newGroup);
+            }
+        }
+        this.groups.keySet().removeIf(uuid -> !uuidsToKeep.contains(uuid));
     }
 }

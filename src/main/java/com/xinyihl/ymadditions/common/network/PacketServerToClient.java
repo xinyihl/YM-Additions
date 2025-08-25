@@ -1,7 +1,6 @@
 package com.xinyihl.ymadditions.common.network;
 
 import com.xinyihl.ymadditions.api.ISyncable;
-import com.xinyihl.ymadditions.common.data.DataStorage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
@@ -51,10 +50,6 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
                     }
                     break;
                 }
-                case WORLD_DATA_SYNC: {
-                    DataStorage.get(Minecraft.getMinecraft().world).doSyncFrom(message.compound);
-                    break;
-                }
             }
 
         });
@@ -62,7 +57,6 @@ public class PacketServerToClient implements IMessage, IMessageHandler<PacketSer
     }
 
     public enum ServerToClient {
-        CONTAINER_SYNC,
-        WORLD_DATA_SYNC
+        CONTAINER_SYNC
     }
 }

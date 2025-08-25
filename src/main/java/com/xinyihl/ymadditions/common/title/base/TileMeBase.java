@@ -64,7 +64,7 @@ public abstract class TileMeBase extends TileEntityBase implements IActionHost, 
     @Nullable
     @Override
     public IGridNode getGridNode(@Nonnull AEPartLocation aePartLocation) {
-        return getActionableNode();
+        return proxy.getNode();
     }
 
     @Nonnull

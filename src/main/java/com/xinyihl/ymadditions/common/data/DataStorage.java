@@ -14,8 +14,9 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class DataStorage extends WorldSavedData {
     private final Map<UUID, Network> networks = new LinkedHashMap<>();
@@ -54,6 +55,7 @@ public class DataStorage extends WorldSavedData {
 
     public void removeNetwork(UUID network) {
         networks.remove(network);
+        this.markDirty();
     }
 
     @Nullable
@@ -72,6 +74,7 @@ public class DataStorage extends WorldSavedData {
             group = Group.create(owner);
             this.groups.put(group.getUuid(), group);
         }
+        this.markDirty();
         return group;
     }
 
@@ -114,62 +117,5 @@ public class DataStorage extends WorldSavedData {
         tag.setTag("networks", list1);
         tag.setTag("groups", list2);
         return tag;
-    }
-
-    public NBTTagCompound getSyncDataPlayer(NBTTagCompound tag, EntityPlayer player) {
-        NBTTagList list1 = new NBTTagList();
-        NBTTagList list2 = new NBTTagList();
-        for (Network network : networks.values().stream().filter(v -> v.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
-            list1.appendTag(network.to(new NBTTagCompound()));
-        }
-        for (Group group : groups.values()) {
-            list2.appendTag(group.deepCopy().injectOnlinePlayers().to(new NBTTagCompound()));
-        }
-        tag.setTag("networks", list1);
-        tag.setTag("groups", list2);
-        return tag;
-    }
-
-
-    public void doSyncFrom(NBTTagCompound tag) {
-        this.updateNetworks(tag);
-        this.updateGroups(tag);
-    }
-
-    private void updateNetworks(NBTTagCompound tag) {
-        NBTTagList list = tag.getTagList("networks", Constants.NBT.TAG_COMPOUND);
-        Set<UUID> uuidsToKeep = new HashSet<>();
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            UUID uuid = nbt.getUniqueId("uuid");
-            uuidsToKeep.add(uuid);
-
-            Network net = networks.get(uuid);
-            if (net != null) {
-                net.of(nbt);
-            } else {
-                Network newNet = Network.create(nbt);
-                networks.put(newNet.getUuid(), newNet);
-            }
-        }
-        networks.keySet().removeIf(uuid -> !uuidsToKeep.contains(uuid));
-    }
-
-    private void updateGroups(NBTTagCompound tag) {
-        NBTTagList list = tag.getTagList("groups", Constants.NBT.TAG_COMPOUND);
-        Set<UUID> uuidsToKeep = new HashSet<>();
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            UUID uuid = nbt.getUniqueId("uuid");
-            uuidsToKeep.add(uuid);
-            Group group = groups.get(uuid);
-            if (group != null) {
-                group.of(nbt);
-            } else {
-                Group newGroup = Group.create(nbt);
-                groups.put(newGroup.getUuid(), newGroup);
-            }
-        }
-        groups.keySet().removeIf(uuid -> !uuidsToKeep.contains(uuid));
     }
 }

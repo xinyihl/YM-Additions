@@ -58,6 +58,10 @@ public class Network implements IListObject {
         return group.hasPermission(player, perm);
     }
 
+    public void update(NBTTagCompound tag) {
+        this.of(tag);
+    }
+
     public Network of(NBTTagCompound tag) {
         if (tag.hasUniqueId("uuid")) this.uuid = tag.getUniqueId("uuid");
         if (tag.hasUniqueId("owner")) this.owner = tag.getUniqueId("owner");

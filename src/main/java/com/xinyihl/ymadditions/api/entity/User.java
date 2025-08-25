@@ -68,6 +68,14 @@ public class User implements IListObject {
         return this.perm == Perm.USER;
     }
 
+    public boolean isGuest() {
+        return this.perm == Perm.USER;
+    }
+
+    public void update(NBTTagCompound tag) {
+        this.of(tag);
+    }
+
     public User of(NBTTagCompound tag) {
         if (tag.hasUniqueId("uuid")) this.uuid = tag.getUniqueId("uuid");
         if (tag.hasKey("name")) this.name = tag.getString("name");
@@ -103,9 +111,8 @@ public class User implements IListObject {
         return perm;
     }
 
-    public User setPerm(Perm perm) {
+    public void setPerm(Perm perm) {
         this.perm = perm;
-        return this;
     }
 
     public boolean isUser(User user) {

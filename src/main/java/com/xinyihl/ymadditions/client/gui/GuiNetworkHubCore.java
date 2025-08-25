@@ -191,16 +191,23 @@ public class GuiNetworkHubCore extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+        this.drawCenteredString(mc.fontRenderer, I18n.format("tile.ymadditions.network_hub.name"), xSize / 2, 4, 0xFFFFFFFF);
+
         int rightPanelX = 103;
         int rightPanelY = 19;
-        this.drawCenteredString(mc.fontRenderer, I18n.format("tile.ymadditions.network_hub.name"), xSize / 2, 4, 0xFFFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + this.selected().getName(), rightPanelX, rightPanelY, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + this.containerNetworkHub.surplusChannels, rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        BlockPosDim pos = this.selected().getSendPos();
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (pos == null ? "" : pos.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + this.selected().isOvert()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + containerNetworkHub.networkHub.isConnected()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.power") + " " + (long) (containerNetworkHub.networkHub.getPower() * 2) + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF);
+        String name = this.selected().getName();
+        Integer surplusChannels = this.containerNetworkHub.surplusChannels;
+        BlockPosDim posDim = this.selected().getSendPos();
+        boolean overt = this.selected().isOvert();
+        boolean connected = containerNetworkHub.networkHub.isConnected();
+        long power = (long) containerNetworkHub.networkHub.getPower();
+
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + name, rightPanelX, rightPanelY, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + (surplusChannels == null ? "Unknown" : surplusChannels), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (posDim == null ? "Unknown" : posDim.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + overt), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + connected), rightPanelX, rightPanelY += 12, 0xFFFFFF);
+        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.power") + " " + power + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF);
     }
 
     @Override

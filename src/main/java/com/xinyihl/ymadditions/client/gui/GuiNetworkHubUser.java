@@ -26,7 +26,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
@@ -63,9 +62,7 @@ public class GuiNetworkHubUser extends GuiContainer {
         this.buttonList.add(this.netScreen);
         //this.buttonList.add(this.userScreen);
 
-        Set<User> users = this.containerNetworkHub.getGroup().getUsers();
-        User user = this.containerNetworkHub.getGroup().getOwner();
-        if (user != null) users.add(user);
+        List<User> users = this.containerNetworkHub.getGroup().getUsers();
         this.listCtrl = new ListCtrl<User>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, users) {
             @Override
             protected IListItem<User> getItem(Object id, String text, User o, int x, int y, int width, int height) {
@@ -94,16 +91,16 @@ public class GuiNetworkHubUser extends GuiContainer {
                     }
 
                     public String getPermText() {
-                        if (get().getPerm() == User.Perm.NONE) {
+                        if (get().isGuest()) {
                             return "gui.ymadditions.network_hub.user.none";
                         }
-                        if (get().getPerm() == User.Perm.USER) {
+                        if (get().isMember()) {
                             return "gui.ymadditions.network_hub.user.user";
                         }
-                        if (get().getPerm() == User.Perm.ADMIN) {
+                        if (get().isAdmin()) {
                             return "gui.ymadditions.network_hub.user.admin";
                         }
-                        if (get().getPerm() == User.Perm.OWNER) {
+                        if (get().isOwner()) {
                             return "gui.ymadditions.network_hub.user.owner";
                         }
                         return "";

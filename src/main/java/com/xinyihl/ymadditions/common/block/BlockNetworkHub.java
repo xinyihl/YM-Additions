@@ -1,12 +1,12 @@
 package com.xinyihl.ymadditions.common.block;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.api.entity.User;
 import com.xinyihl.ymadditions.common.container.GuiHandler;
 import com.xinyihl.ymadditions.common.data.DataStorage;
 import com.xinyihl.ymadditions.common.title.TileNetworkHub;
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -80,7 +80,7 @@ public class BlockNetworkHub extends Block {
             if (te instanceof TileNetworkHub) {
                 Network network = DataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());
                 if (network == null || network.hasPermission(playerIn, User.Perm.USER)) {
-                    playerIn.openGui(YMAdditions.instance, GuiHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                    Utils.openGui(playerIn, GuiHandler.GUI_NETWORK_HUB, worldIn, pos.getX(), pos.getY(), pos.getZ());
                 } else {
                     playerIn.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
                 }

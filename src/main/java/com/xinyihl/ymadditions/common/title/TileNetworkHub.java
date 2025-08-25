@@ -38,7 +38,7 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
     private double power = Configurations.GENERAL_CONFIG.powerBase;
     private IGridConnection connection = null;
     private int tickCounter = 0;
-    private Integer surplusChannels = 0;
+    private Integer surplusChannels;
 
     public TileNetworkHub() {
         super();
@@ -61,35 +61,40 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
         if (this.world.isRemote) return;
         this.tickCounter = (this.tickCounter + 1) % 20;
         if (this.tickCounter % 20 == 0) {
-            if (this.networkUuid != null) {
-                DataStorage storage = DataStorage.get(this.world);
-                Network network = storage.getNetwork(this.networkUuid);
-                if (network == null) {
-                    this.unsetAll();
-                    this.sync();
-                    return;
-                }
+            this.onTick();
+        }
+    }
 
-                if (!this.isHead && this.getPos().equals(network.getSendPos().toBlockPos())) {
-                    this.setHead(true);
-                }
-
-                if (this.isHead) {
-                    if (this.isConnected) {
-                        this.setConnected(!network.getReceivePos().isEmpty());
-                    }
-                    int howMany = 0;
-                    for (IGridConnection gc : this.getActionableNode().getConnections()) {
-                        howMany = Math.max(gc.getUsedChannels(), howMany);
-                    }
-                    this.surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
-                }
-
-                if (!this.isHead && this.connection == null) {
-                    this.setupConnection(network);
-                }
-
+    private void onTick(){
+        if (this.networkUuid != null) {
+            DataStorage storage = DataStorage.get(this.world);
+            Network network = storage.getNetwork(this.networkUuid);
+            if (network == null) {
+                this.unsetAll();
                 this.sync();
+                return;
+            }
+
+            BlockPosDim pos = network.getSendPos();
+            if (!this.isHead && pos!= null && this.getPos().equals(pos.toBlockPos())) {
+                this.setHead(true);
+                this.sync();
+            }
+
+            if (this.isHead) {
+                if (this.isConnected) {
+                    this.setConnected(!network.getReceivePos().isEmpty());
+                    this.sync();
+                }
+                int howMany = 0;
+                for (IGridConnection gc : this.getActionableNode().getConnections()) {
+                    howMany = Math.max(gc.getUsedChannels(), howMany);
+                }
+                this.surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
+            }
+
+            if (!this.isHead && this.connection == null) {
+                this.setupConnection(network);
             }
         }
     }
@@ -115,7 +120,6 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
         if (this.networkUuid != null) tag.setUniqueId("networkUuid", this.networkUuid);
         tag.setBoolean("isConnected", this.isConnected);
         tag.setDouble("power", this.power);
-        tag.setInteger("surplusChannels", this.surplusChannels);
         return tag;
     }
 
@@ -125,7 +129,6 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
         if (tag.hasUniqueId("networkUuid")) this.networkUuid = tag.getUniqueId("networkUuid");
         this.isConnected = tag.getBoolean("isConnected");
         this.power = tag.getDouble("power");
-        this.surplusChannels = tag.getInteger("surplusChannels");
         if (this.world.isRemote) {
             IBlockState state = this.world.getBlockState(this.getPos());
             this.world.notifyBlockUpdate(this.pos, state, state, RERENDER_MAIN_THREAD);
@@ -161,6 +164,8 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
             that.setConnected(true);
             this.getProxy().setIdlePowerUsage(power);
             network.addReceivePos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
+            this.sync();
+            that.sync();
         } catch (FailedConnectionException e) {
             this.unsetAll();
         }
