@@ -69,7 +69,7 @@ public class User implements IListObject {
     }
 
     public boolean isGuest() {
-        return this.perm == Perm.USER;
+        return this.perm == Perm.NONE;
     }
 
     public void update(NBTTagCompound tag) {
