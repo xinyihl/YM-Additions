@@ -62,6 +62,7 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
         this.tickCounter = (this.tickCounter + 1) % 20;
         if (this.tickCounter % 20 == 0) {
             this.onTick();
+            this.sync();
         }
     }
 
@@ -71,20 +72,17 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
             Network network = storage.getNetwork(this.networkUuid);
             if (network == null) {
                 this.unsetAll();
-                this.sync();
                 return;
             }
 
             BlockPosDim pos = network.getSendPos();
             if (!this.isHead && pos!= null && this.getPos().equals(pos.toBlockPos())) {
                 this.setHead(true);
-                this.sync();
             }
 
             if (this.isHead) {
                 if (this.isConnected) {
                     this.setConnected(!network.getReceivePos().isEmpty());
-                    this.sync();
                 }
                 int howMany = 0;
                 for (IGridConnection gc : this.getActionableNode().getConnections()) {
