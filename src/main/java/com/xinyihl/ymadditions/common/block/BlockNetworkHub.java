@@ -1,5 +1,6 @@
 package com.xinyihl.ymadditions.common.block;
 
+import appeng.util.Platform;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.api.entity.User;
@@ -13,6 +14,7 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -76,6 +78,19 @@ public class BlockNetworkHub extends Block {
     @Override
     public boolean onBlockActivated(World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
+            if (!playerIn.getHeldItem(hand).isEmpty()) {
+                ItemStack heldItem = playerIn.getHeldItem(hand);
+                if (Platform.isWrench(playerIn, heldItem, pos) && playerIn.isSneaking()) {
+                    IBlockState blockState = worldIn.getBlockState(pos);
+                    Block block = blockState.getBlock();
+                    if (block.removedByPlayer(blockState, worldIn, pos, playerIn, false)) {
+                        worldIn.spawnEntity(new EntityItem(worldIn, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, new ItemStack(block)));
+                        worldIn.setBlockToAir(pos);
+                        return true;
+                    }
+                }
+            }
+
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileNetworkHub) {
                 Network network = DataStorage.get(worldIn).getNetwork(((TileNetworkHub) te).getNetworkUuid());

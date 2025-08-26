@@ -3,7 +3,7 @@ itemGroup.yudream_tab=YM-Additions
 tile.ymadditions.network_hub.name=ME无线收发器
 
 statusmessage.ymadditions.info.nopermission=§c你没有权限
-statusmessage.ymadditions.info.head_delete_protection=§c请先删除网络(蹲下破坏以绕过保护)
+statusmessage.ymadditions.info.head_delete_protection=§c请先删除网络(或使用扳手破坏绕过保护)
 
 tooltip.ymadditions.tile_me_base.missing_channel=设备缺少频道
 tooltip.ymadditions.tile_me_base.online=设备开启

@@ -3,7 +3,7 @@ itemGroup.yudream_tab=YM-Additions
 tile.ymadditions.network_hub.name=ME Wireless Transceiver
 
 statusmessage.ymadditions.info.nopermission=§cYou don't have permission.
-statusmessage.ymadditions.info.head_delete_protection=§case delete the network first
+statusmessage.ymadditions.info.head_delete_protection=§cPlease delete the network first(or use a wrench to break the protection)
 
 tooltip.ymadditions.tile_me_base.missing_channel=Device missing channel
 tooltip.ymadditions.tile_me_base.online=Device online
