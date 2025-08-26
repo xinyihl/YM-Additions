@@ -39,6 +39,7 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
     private IGridConnection connection = null;
     private int tickCounter = 0;
     private Integer surplusChannels;
+    private long lastWorldTime = -1;
 
     public TileNetworkHub() {
         super();
@@ -59,10 +60,14 @@ public class TileNetworkHub extends TileMeBase implements ITickable {
     @Override
     public void update() {
         if (this.world.isRemote) return;
-        this.tickCounter = (this.tickCounter + 1) % 20;
-        if (this.tickCounter % 20 == 0) {
-            this.onTick();
-            this.sync();
+        long totalWorldTime = this.world.getTotalWorldTime();
+        if (this.lastWorldTime != totalWorldTime) {
+            this.lastWorldTime = totalWorldTime;
+            this.tickCounter = (this.tickCounter + 1) % 20;
+            if (this.tickCounter % 20 == 0) {
+                this.onTick();
+                this.sync();
+            }
         }
     }
 
