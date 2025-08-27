@@ -202,12 +202,16 @@ public class GuiNetworkHubCore extends GuiContainer {
         boolean connected = containerNetworkHub.networkHub.isConnected();
         long power = (long) containerNetworkHub.networkHub.getPower();
 
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + name, rightPanelX, rightPanelY, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + (surplusChannels == null ? "Unknown" : surplusChannels), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (posDim == null ? "Unknown" : posDim.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.public." + overt), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.state." + connected), rightPanelX, rightPanelY += 12, 0xFFFFFF);
-        this.fontRenderer.drawString(I18n.format("gui.ymadditions.network_hub.info.power") + " " + power + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF);
+        float scale = 1.0F;
+        if (!"zh_cn".equals(mc.gameSettings.language)) {
+            scale = 0.7f;
+        }
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.network_name") + " " + name, rightPanelX, rightPanelY, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.surplus_channels") + " " + (surplusChannels == null ? "Unknown" : surplusChannels), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (posDim == null ? "Unknown" : posDim.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.public." + overt), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.state." + connected), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.power") + " " + power + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF, scale);
     }
 
     @Override

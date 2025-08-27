@@ -29,7 +29,6 @@ public class MyButton extends GuiButton {
             this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, i * this.height, this.width / 2, this.height);
             this.mouseDragged(mc, mouseX, mouseY);
             int j = 14737632;
-
             if (packedFGColour != 0) {
                 j = packedFGColour;
             } else if (!this.enabled) {
@@ -37,8 +36,13 @@ public class MyButton extends GuiButton {
             } else if (this.hovered) {
                 j = 16777120;
             }
-
-            this.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, this.y + (this.height - 8) / 2, j);
+            float scale = 1.0F;
+            if (!"zh_cn".equals(mc.gameSettings.language)) {
+                scale = 0.6f;
+            }
+            StringRenderUtil.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, (int) (this.y + (this.height - 8 * scale) / 2), j, scale);
         }
     }
+
+
 }
