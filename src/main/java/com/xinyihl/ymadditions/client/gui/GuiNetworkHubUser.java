@@ -1,14 +1,13 @@
 package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.api.IListItem;
 import com.xinyihl.ymadditions.api.entity.User;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.IconButton;
 import com.xinyihl.ymadditions.client.control.ListItem;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
-import com.xinyihl.ymadditions.common.network.PacketClientToServer;
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -17,7 +16,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -27,8 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
 public class GuiNetworkHubUser extends GuiContainer {
     private final ContainerNetworkHub containerNetworkHub;
@@ -112,13 +108,9 @@ public class GuiNetworkHubUser extends GuiContainer {
                         String name = get().getName();
                         if (uuid == null || name == null) return;
                         NBTTagCompound tag = new NBTTagCompound();
-                        tag.setInteger("button", 2);
                         tag.setUniqueId("user", uuid);
                         tag.setString("name", name);
-                        if (Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_LSHIFT) {
-                            tag.setBoolean("isShifting", true);
-                        }
-                        YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
+                        Utils.sendAction("change-player-permission", tag);
                     }
                 };
             }

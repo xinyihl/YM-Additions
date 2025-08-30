@@ -2,7 +2,7 @@ package com.xinyihl.ymadditions.common.container;
 
 import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.api.IContaierTickable;
-import com.xinyihl.ymadditions.api.IInputHandler;
+import com.xinyihl.ymadditions.api.IActionHandler;
 import com.xinyihl.ymadditions.api.ISyncable;
 import com.xinyihl.ymadditions.api.entity.Group;
 import com.xinyihl.ymadditions.api.entity.Network;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.CONTAINER_SYNC;
 
-public class ContainerNetworkHub extends Container implements IInputHandler, IContaierTickable, ISyncable {
+public class ContainerNetworkHub extends Container implements IActionHandler, IContaierTickable, ISyncable {
 
     public EntityPlayer player;
     public TileNetworkHub networkHub;
@@ -74,12 +74,11 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
     }
 
     @Override
-    public void onGuiAtion(NBTTagCompound compound) {
+    public void onAction(String type, NBTTagCompound compound) {
         if (this.player.world.isRemote) return;
-        int button = compound.getInteger("button");
-        switch (button) {
-            case 0: { // 切换选择的网络
-                UUID uuid = compound.getUniqueId("networkUuid");
+        switch (type) {
+            case "switch-network": { // 切换选择的网络
+                UUID uuid = compound.getUniqueId("uuid");
                 Network network = this.storage.getNetwork(uuid);
                 if (network != null && network.hasPermission(this.player, User.Perm.USER)) {
                     this.selectedNetwork = uuid;
@@ -87,8 +86,8 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 this.sync();
                 break;
             }
-            case 1: { // 创建网络
-                String name = compound.getString("name");
+            case "create-network": { // 创建网络
+                String name = compound.getString("string");
                 Network network = this.storage.createNetwork(player, name, false, new BlockPosDim(networkHub.getPos(), networkHub.getWorld().provider.getDimension()));
                 this.networkHub.setHead(true);
                 this.networkHub.setNetworkUuid(network.getUuid());
@@ -98,7 +97,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 this.sync();
                 break;
             }
-            case 2: { // 修改玩家权限
+            case "change-player-permission": { // 修改玩家权限
                 UUID uuid = compound.getUniqueId("user");
                 String name = compound.getString("name");
                 Group group = this.getGroup();
@@ -129,7 +128,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 }
                 break;
             }
-            case 996: { // 删除网络
+            case "delete-network": { // 删除网络
                 Network network = this.storage.getNetwork(this.selectedNetwork);
                 if (network != null && network.hasPermission(this.player, User.Perm.ADMIN)) {
                     storage.removeNetwork(this.selectedNetwork);
@@ -142,7 +141,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 }
                 break;
             }
-            case 997: { // 连接网络
+            case "connect-network": { // 连接网络
                 Network network = this.storage.getNetwork(this.selectedNetwork);
                 if (network != null && network.hasPermission(this.player, User.Perm.USER)) {
                     if (!Objects.equals(selectedNetwork, networkHub.getNetworkUuid())) {
@@ -157,7 +156,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 }
                 break;
             }
-            case 998: { // 断开连接
+            case "disconnect-network": { // 断开连接
                 Network network = this.storage.getNetwork(this.networkHub.getNetworkUuid());
                 if (network != null && network.hasPermission(this.player, User.Perm.USER)) {
                     this.networkHub.breakConnection();
@@ -170,7 +169,7 @@ public class ContainerNetworkHub extends Container implements IInputHandler, ICo
                 }
                 break;
             }
-            case 999: { // 切换网络是否公开
+            case "switch-public": { // 切换网络是否公开
                 Network network = this.storage.getNetwork(selectedNetwork);
                 if (network != null && network.hasPermission(this.player, User.Perm.ADMIN)) {
                     network.setOvert(!network.isOvert());

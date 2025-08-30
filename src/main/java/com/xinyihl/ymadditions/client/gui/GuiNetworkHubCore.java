@@ -1,14 +1,13 @@
 package com.xinyihl.ymadditions.client.gui;
 
 import com.xinyihl.ymadditions.Tags;
-import com.xinyihl.ymadditions.YMAdditions;
 import com.xinyihl.ymadditions.api.IListItem;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.client.component.ListCtrl;
 import com.xinyihl.ymadditions.client.control.*;
 import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
-import com.xinyihl.ymadditions.common.network.PacketClientToServer;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
+import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
 import net.minecraft.client.gui.GuiTextField;
@@ -16,7 +15,6 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -30,8 +28,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
 /* 由魔法数字组成的 GUI （；´д｀）ゞ */
 @SideOnly(Side.CLIENT)
@@ -82,10 +78,7 @@ public class GuiNetworkHubCore extends GuiContainer {
                     public void click() {
                         UUID uuid = get().getUuid();
                         if (uuid == null) return;
-                        NBTTagCompound tag = new NBTTagCompound();
-                        tag.setInteger("button", 0);
-                        tag.setUniqueId("networkUuid", uuid);
-                        YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
+                        Utils.sendAction("switch-network", uuid);
                     }
                 };
             }
@@ -234,10 +227,20 @@ public class GuiNetworkHubCore extends GuiContainer {
             return;
         }
 
-        if (ba.id >= 900 && ba.id <= 999) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setInteger("button", ba.id);
-            YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
+        if (ba.id == deleteButton.id) {
+            Utils.sendAction("delete-network");
+        }
+
+        if (ba.id == connectButton.id) {
+            Utils.sendAction("connect-network");
+        }
+
+        if (ba.id == disConnectButton.id) {
+            Utils.sendAction("disconnect-network");
+        }
+
+        if (ba.id == lockButton.id) {
+            Utils.sendAction("switch-public");
         }
     }
 
@@ -252,11 +255,7 @@ public class GuiNetworkHubCore extends GuiContainer {
                 this.connectButton.visible = true;
                 this.isCreating = false;
                 this.createField.setVisible(false);
-
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setInteger("button", 1);
-                tag.setString("name", createField.getText());
-                YMAdditions.instance.networkWrapper.sendToServer(new PacketClientToServer(BUTTON_ACTION, tag));
+                Utils.sendAction("create-network", createField.getText());
                 this.createField.setText("");
             }
             return;

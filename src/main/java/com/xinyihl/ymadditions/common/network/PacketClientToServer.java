@@ -1,6 +1,6 @@
 package com.xinyihl.ymadditions.common.network;
 
-import com.xinyihl.ymadditions.api.IInputHandler;
+import com.xinyihl.ymadditions.api.IActionHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,8 +41,9 @@ public class PacketClientToServer implements IMessage, IMessageHandler<PacketCli
         player.server.addScheduledTask(() -> {
             switch (ClientToServer.valueOf(message.type)) {
                 case BUTTON_ACTION: {
-                    if (player.openContainer instanceof IInputHandler) {
-                        ((IInputHandler) player.openContainer).onGuiAtion(message.compound);
+                    if (player.openContainer instanceof IActionHandler) {
+                        String type = message.compound.getString("type");
+                        ((IActionHandler) player.openContainer).onAction(type, message.compound);
                     }
                     break;
                 }
