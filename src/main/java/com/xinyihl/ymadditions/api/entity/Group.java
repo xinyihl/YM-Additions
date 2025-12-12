@@ -29,6 +29,13 @@ public class Group {
         return this;
     }
 
+    public Group injectOwner() {
+        if (!users.contains(this.owner)) {
+            users.add(0, this.owner);
+        }
+        return this;
+    }
+
     private Group() {
 
     }
@@ -59,13 +66,6 @@ public class Group {
         User.Perm userPerm = user.getPerm();
         if (userPerm == null) return false;
         return userPerm.ordinal() >= perm.ordinal();
-    }
-
-    public Group injectOwnerToUsers() {
-        if (!users.contains(this.owner)) {
-            users.add(0, this.owner);
-        }
-        return this;
     }
 
     @Nullable

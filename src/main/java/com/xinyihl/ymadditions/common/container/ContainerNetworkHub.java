@@ -214,7 +214,7 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
             list1.appendTag(network.to(new NBTTagCompound()));
         }
         for (Group group : this.groups.values().stream().filter(u -> u.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
-            list2.appendTag(group.deepCopy().injectOnlinePlayers().injectOwnerToUsers().to(new NBTTagCompound()));
+            list2.appendTag(group.deepCopy().injectOnlinePlayers().injectOwner().to(new NBTTagCompound()));
         }
         tag.setTag("networks", list1);
         tag.setTag("groups", list2);
