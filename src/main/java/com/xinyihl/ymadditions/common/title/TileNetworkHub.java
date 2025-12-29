@@ -7,6 +7,8 @@ import appeng.api.networking.IGridConnection;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.core.AEConfig;
+import appeng.integration.modules.theoneprobe.TheOneProbeText;
+import appeng.parts.networking.PartDenseCableSmart;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.common.data.DataStorage;
@@ -123,6 +125,14 @@ public class TileNetworkHub extends TileMeBase {
     public void addProbeInfo(Consumer<String> consumer, Function<String, String> loc) {
         super.addProbeInfo(consumer, loc);
         consumer.accept(loc.apply("tile_network_hub.state." + this.isConnected()));
+
+        int maxChannels = AEConfig.instance().getDenseChannelCapacity();
+        int usedChannels = 0;
+        for (IGridConnection gc : this.getActionableNode().getConnections()) {
+            usedChannels = Math.max(gc.getUsedChannels(), usedChannels);
+        }
+        consumer.accept(String.format(TheOneProbeText.CHANNELS.getLocal(), usedChannels, maxChannels));
+
         if (Configurations.GENERAL_CONFIG.doNetworkUUIDShow) {
             UUID uuid = this.getNetworkUuid();
             consumer.accept(loc.apply("tile_network_hub.network") + " " + (uuid == null ? "Unknown" : uuid.toString()));
