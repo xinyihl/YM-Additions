@@ -8,7 +8,6 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.core.AEConfig;
 import appeng.integration.modules.theoneprobe.TheOneProbeText;
-import appeng.parts.networking.PartDenseCableSmart;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.common.data.DataStorage;
@@ -16,7 +15,6 @@ import com.xinyihl.ymadditions.common.integration.crt.NetHubPowerUsage;
 import com.xinyihl.ymadditions.common.registry.Registry;
 import com.xinyihl.ymadditions.common.title.base.TileMeBase;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -29,8 +27,6 @@ import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import static net.minecraftforge.common.util.Constants.BlockFlags.RERENDER_MAIN_THREAD;
 
 public class TileNetworkHub extends TileMeBase {
     private boolean isHead = false;
@@ -115,10 +111,6 @@ public class TileNetworkHub extends TileMeBase {
         this.isConnected = tag.getBoolean("isConnected");
         this.isHead = tag.getBoolean("isHead");
         this.power = tag.getDouble("power");
-        if (this.world.isRemote) {
-            IBlockState state = this.world.getBlockState(this.getPos());
-            this.world.notifyBlockUpdate(this.pos, state, state, RERENDER_MAIN_THREAD);
-        }
     }
 
     @Override

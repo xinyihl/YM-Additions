@@ -1,6 +1,7 @@
 package com.xinyihl.ymadditions.common.title.base;
 
 import com.xinyihl.ymadditions.api.ISyncable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -12,6 +13,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
+
+import static net.minecraftforge.common.util.Constants.BlockFlags.RERENDER_MAIN_THREAD;
 
 public abstract class TileEntityBase extends TileEntity implements ISyncable, ITickable {
 
@@ -73,5 +76,9 @@ public abstract class TileEntityBase extends TileEntity implements ISyncable, IT
     @Override
     public final void onDataPacket(@Nonnull NetworkManager manager, @Nonnull SPacketUpdateTileEntity packet) {
         this.doSyncFrom(packet.getNbtCompound());
+        if (this.world.isRemote) {
+            IBlockState state = this.world.getBlockState(this.getPos());
+            this.world.notifyBlockUpdate(this.pos, state, state, RERENDER_MAIN_THREAD);
+        }
     }
 }
