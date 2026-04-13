@@ -15,13 +15,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public class EventHandler {
 
-    private static final Deque<IReadyable> readyQueue = new ArrayDeque<>();
+    private static final Deque<IReadyable> readyQueue = new ConcurrentLinkedDeque<>();
 
     public static void enqueue(IReadyable tile) {
         if (Platform.isServer()) {
@@ -32,8 +32,12 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onServerTick(ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            while (!readyQueue.isEmpty()) {
-                readyQueue.pop().onReady();
+            if(readyQueue.isEmpty()) {
+                return;
+            }
+            IReadyable task;
+            while ((task = readyQueue.poll()) != null) {
+                task.onReady();
             }
         }
     }
@@ -51,4 +55,3 @@ public class EventHandler {
         }
     }
 }
-
