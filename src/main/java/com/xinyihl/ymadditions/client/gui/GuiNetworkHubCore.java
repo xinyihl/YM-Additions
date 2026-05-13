@@ -204,7 +204,7 @@ public class GuiNetworkHubCore extends GuiContainer {
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (posDim == null ? "Unknown" : posDim.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.public." + overt), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.state." + connected), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
-        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.power") + " " + power + " RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.power") + " " + Utils.formatCompact(power)  + "RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF, scale);
     }
 
     @Override
