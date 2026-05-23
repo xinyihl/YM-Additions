@@ -11,6 +11,7 @@ tooltip.ymadditions.tile_me_base.offline=设备关闭
 tooltip.ymadditions.tile_network_hub.state.true=连接状态: §a已连接
 tooltip.ymadditions.tile_network_hub.state.false=连接状态: §c未连接
 tooltip.ymadditions.tile_network_hub.network=网络:
+tooltip.ymadditions.tile_network_hub.channels=频道:
 
 gui.ymadditions.network_hub.button.create=创建
 gui.ymadditions.network_hub.button.delete=删除

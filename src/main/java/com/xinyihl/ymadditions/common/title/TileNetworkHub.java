@@ -1,13 +1,11 @@
 package com.xinyihl.ymadditions.common.title;
 
-import appeng.api.AEApi;
-import appeng.api.exceptions.FailedConnectionException;
+import appeng.api.networking.GridHelper;
 import appeng.api.networking.GridFlags;
+import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridConnection;
 import appeng.api.util.AECableType;
-import appeng.api.util.AEPartLocation;
 import appeng.core.AEConfig;
-import appeng.integration.modules.theoneprobe.TheOneProbeText;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.common.data.DataStorage;
@@ -18,6 +16,7 @@ import com.xinyihl.ymadditions.common.utils.BlockPosDim;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
@@ -37,17 +36,17 @@ public class TileNetworkHub extends TileMeBase {
     private IGridConnection connection = null;
 
     public TileNetworkHub() {
-        this.proxy.setFlags(GridFlags.DENSE_CAPACITY);
+        this.mainNode.setFlags(GridFlags.DENSE_CAPACITY);
     }
 
     @Override
     public ItemStack getVisualItemStack() {
-        return new ItemStack(Registry.itemNetworkHub);
+        return Registry.itemNetworkHub == null ? ItemStack.EMPTY : new ItemStack(Registry.itemNetworkHub);
     }
 
     @Nonnull
     @Override
-    public AECableType getCableConnectionType(@Nonnull AEPartLocation aePartLocation) {
+    public AECableType getCableConnectionType(EnumFacing side) {
         return AECableType.DENSE_SMART;
     }
 
@@ -70,10 +69,13 @@ public class TileNetworkHub extends TileMeBase {
                     this.setConnected(!network.getReceivePos().isEmpty());
                 }
                 int howMany = 0;
-                for (IGridConnection gc : this.getActionableNode().getConnections()) {
-                    howMany = Math.max(gc.getUsedChannels(), howMany);
+                IGridNode node = this.getActionableNode();
+                if (node != null) {
+                    for (IGridConnection gc : node.getConnections()) {
+                        howMany = Math.max(gc.getUsedChannels(), howMany);
+                    }
                 }
-                this.surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
+                this.surplusChannels = Math.max(this.getDenseChannelCapacity() - howMany, 0);
             }
 
             if (!this.isHead && this.connection == null) {
@@ -117,13 +119,27 @@ public class TileNetworkHub extends TileMeBase {
     public void addProbeInfo(Consumer<String> consumer, Function<String, String> loc) {
         super.addProbeInfo(consumer, loc);
         consumer.accept(loc.apply("tile_network_hub.state." + this.isConnected()));
-
-        int maxChannels = AEConfig.instance().getDenseChannelCapacity();
         int usedChannels = 0;
-        for (IGridConnection gc : this.getActionableNode().getConnections()) {
-            usedChannels = Math.max(gc.getUsedChannels(), usedChannels);
+        if (this.isHead()) {
+            usedChannels = this.getSurplusChannels();
+        } else if (this.networkUuid != null) {
+            DataStorage storage = DataStorage.get(this.world);
+            Network network = storage.getNetwork(this.networkUuid);
+            BlockPosDim pos = null;
+            if (network != null) {
+                pos = network.getSendPos();
+            }
+            if (pos != null) {
+                World thatWorld = DimensionManager.getWorld(pos.getDimension());
+                if (thatWorld != null && thatWorld.isBlockLoaded(pos.toBlockPos())) {
+                    TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
+                    if (tile instanceof TileNetworkHub that) {
+                        usedChannels = that.getSurplusChannels();
+                    }
+                }
+            }
         }
-        consumer.accept(String.format(TheOneProbeText.CHANNELS.getLocal(), usedChannels, maxChannels));
+        consumer.accept(loc.apply("tile_network_hub.channels") + " " + usedChannels);
 
         if (Configurations.GENERAL_CONFIG.doNetworkUUIDShow) {
             UUID uuid = this.getNetworkUuid();
@@ -144,15 +160,18 @@ public class TileNetworkHub extends TileMeBase {
         }
         TileNetworkHub that = (TileNetworkHub) tile;
         power = NetHubPowerUsage.calcNetHubPowerUsage(this.getPos(), that.getPos(), this.world.provider.getDimension(), thatWorld.provider.getDimension());
+        IGridNode thisNode = this.getActionableNode();
+        IGridNode thatNode = that.getActionableNode();
+        if (thisNode == null || thatNode == null) return;
         try {
-            this.connection = AEApi.instance().grid().createGridConnection(this.getActionableNode(), that.getActionableNode());
+            this.connection = GridHelper.createConnection(thisNode, thatNode);
             this.setConnected(true);
             that.setConnected(true);
-            this.getProxy().setIdlePowerUsage(power);
+            this.mainNode.setIdlePowerUsage(power);
             network.addReceivePos(new BlockPosDim(this.getPos(), this.world.provider.getDimension()));
             this.sync();
             that.sync();
-        } catch (FailedConnectionException e) {
+        } catch (RuntimeException e) {
             this.unsetAll();
         }
     }
@@ -190,7 +209,7 @@ public class TileNetworkHub extends TileMeBase {
             this.connection.destroy();
             this.connection = null;
         }
-        this.getProxy().setIdlePowerUsage(0);
+        this.mainNode.setIdlePowerUsage(0);
     }
 
     @Override
@@ -242,5 +261,9 @@ public class TileNetworkHub extends TileMeBase {
 
     public Integer getSurplusChannels() {
         return surplusChannels;
+    }
+
+    private int getDenseChannelCapacity() {
+        return 32 * AEConfig.instance().getChannelMode().getCableCapacityFactor();
     }
 }

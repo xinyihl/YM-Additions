@@ -10,21 +10,19 @@
   {
     "a":
     {
-      "item": "appliedenergistics2:wireless_access_point"
+      "item": "ae2:wireless_access_point"
     },
     "c": {
-      "type": "appliedenergistics2:part",
-      "part": "cable_dense_smart"
+      "item": "ae2:fluix_smart_dense_cable"
     },
     "d": {
-      "type": "appliedenergistics2:part",
-      "part": "material.wireless_booster"
+      "item": "ae2:wireless_booster"
     },
     "b": {
-      "item": "appliedenergistics2:quantum_link"
+      "item": "ae2:quantum_link"
     },
     "x": {
-      "item": "appliedenergistics2:quantum_ring"
+      "item": "ae2:quantum_ring"
     }
   },
   "result":

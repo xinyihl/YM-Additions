@@ -1,12 +1,12 @@
 package com.xinyihl.ymadditions.common.title.base;
 
+import appeng.api.networking.GridHelper;
 import appeng.api.networking.IGridNode;
+import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IManagedGridNode;
+import appeng.api.networking.IInWorldGridNodeHost;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AECableType;
-import appeng.api.util.AEPartLocation;
-import appeng.api.util.DimensionalCoord;
-import appeng.me.helpers.AENetworkProxy;
-import appeng.me.helpers.IGridProxyable;
 import appeng.util.Platform;
 import com.xinyihl.ymadditions.api.IHasProbeInfo;
 import com.xinyihl.ymadditions.api.IReadyable;
@@ -14,66 +14,54 @@ import com.xinyihl.ymadditions.common.event.EventHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class TileMeBase extends TileEntityBase implements IActionHost, IGridProxyable, IHasProbeInfo, IReadyable {
+public abstract class TileMeBase extends TileEntityBase implements IActionHost, IInWorldGridNodeHost, IHasProbeInfo, IReadyable {
 
-    protected final AENetworkProxy proxy = new AENetworkProxy(this, "aeProxy", this.getVisualItemStack(), true);
+    protected final IManagedGridNode mainNode = GridHelper.createManagedNode(this, new NodeListener())
+            .setInWorldNode(true)
+            .setTagName("aeProxy")
+            .setExposedOnSides(EnumSet.allOf(EnumFacing.class));
 
     public abstract ItemStack getVisualItemStack();
 
     @Override
     public void readFromNBT(@Nonnull NBTTagCompound tag) {
         super.readFromNBT(tag);
-        proxy.readFromNBT(tag);
+        this.mainNode.loadFromNBT(tag);
     }
 
     @Nonnull
     @Override
     public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound tag) {
         super.writeToNBT(tag);
-        proxy.writeToNBT(tag);
+        this.mainNode.saveToNBT(tag);
         return tag;
-    }
-
-    @Nonnull
-    @Override
-    public IGridNode getActionableNode() {
-        return proxy.getNode();
-    }
-
-    @Override
-    public AENetworkProxy getProxy() {
-        return proxy;
-    }
-
-    @Override
-    public DimensionalCoord getLocation() {
-        return new DimensionalCoord(this);
-    }
-
-    @Override
-    public void gridChanged() {
-
     }
 
     @Nullable
     @Override
-    public IGridNode getGridNode(@Nonnull AEPartLocation aePartLocation) {
-        return proxy.getNode();
+    public IGridNode getActionableNode() {
+        return this.mainNode.getNode();
+    }
+
+    @Override
+    public IGridNode getGridNode(EnumFacing side) {
+        return this.mainNode.getNode();
     }
 
     @Nonnull
     @Override
-    public AECableType getCableConnectionType(@Nonnull AEPartLocation aePartLocation) {
+    public AECableType getCableConnectionType(EnumFacing side) {
         return AECableType.SMART;
     }
 
-    @Override
     public void securityBreak() {
         getWorld().destroyBlock(getPos(), true);
     }
@@ -81,43 +69,55 @@ public abstract class TileMeBase extends TileEntityBase implements IActionHost, 
     @Override
     public void onChunkUnload() {
         super.onChunkUnload();
-        proxy.onChunkUnload();
+        this.mainNode.destroy();
     }
 
     @Override
     public void invalidate() {
         super.invalidate();
-        proxy.invalidate();
+        this.mainNode.destroy();
     }
 
     @Override
     public void validate() {
         super.validate();
-        proxy.validate();
         EventHandler.enqueue(this);
     }
 
     @Override
     public void onReady() {
         if (!isInvalid()) {
-            proxy.onReady();
+            this.mainNode.setVisualRepresentation(this.getVisualItemStack());
+            this.mainNode.create(world, pos);
             Platform.notifyBlocksOfNeighbors(world, pos);
         }
     }
 
     public void setOwner(EntityPlayer placer) {
-        proxy.setOwner(placer);
+        this.mainNode.setOwningPlayer(placer);
     }
 
     public void addProbeInfo(Consumer<String> consumer, Function<String, String> loc) {
-        if (this.proxy.isPowered()) {
-            if (this.proxy.isActive()) {
+        if (this.mainNode.isPowered()) {
+            if (this.mainNode.isActive()) {
                 consumer.accept(loc.apply("tile_me_base.online"));
             } else {
                 consumer.accept(loc.apply("tile_me_base.missing_channel"));
             }
         } else {
             consumer.accept(loc.apply("tile_me_base.offline"));
+        }
+    }
+
+    private static class NodeListener implements IGridNodeListener<TileMeBase> {
+        @Override
+        public void onSaveChanges(TileMeBase tile, IGridNode node) {
+            tile.markDirty();
+        }
+
+        @Override
+        public void onStateChanged(TileMeBase tile, IGridNode node, State state) {
+            tile.sync();
         }
     }
 }

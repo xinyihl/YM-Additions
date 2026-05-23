@@ -1,6 +1,5 @@
 package com.xinyihl.ymadditions.common.block;
 
-import appeng.util.Platform;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.api.entity.User;
@@ -16,6 +15,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -80,7 +80,7 @@ public class BlockNetworkHub extends Block {
         if (!worldIn.isRemote) {
             if (!playerIn.getHeldItem(hand).isEmpty()) {
                 ItemStack heldItem = playerIn.getHeldItem(hand);
-                if (Platform.isWrench(playerIn, heldItem, pos) && playerIn.isSneaking()) {
+                if (isAeWrench(heldItem) && playerIn.isSneaking()) {
                     IBlockState blockState = worldIn.getBlockState(pos);
                     Block block = blockState.getBlock();
                     if (block.removedByPlayer(blockState, worldIn, pos, playerIn, false)) {
@@ -137,5 +137,14 @@ public class BlockNetworkHub extends Block {
             }
         }
         super.breakBlock(world, pos, state);
+    }
+
+    private boolean isAeWrench(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        Item item = stack.getItem();
+        ResourceLocation id = item.getRegistryName();
+        if (id == null || !"ae2".equals(id.getNamespace())) return false;
+        String path = id.getPath();
+        return path.endsWith("_wrench") || "network_tool".equals(path);
     }
 }

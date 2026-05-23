@@ -11,6 +11,7 @@ tooltip.ymadditions.tile_me_base.offline=Device offline
 tooltip.ymadditions.tile_network_hub.state.true=Connection status: §aConnected
 tooltip.ymadditions.tile_network_hub.state.false=Connection status: §cNot connected
 tooltip.ymadditions.tile_network_hub.network=Network:
+tooltip.ymadditions.tile_network_hub.channels=Channels:
 
 gui.ymadditions.network_hub.button.create=Create
 gui.ymadditions.network_hub.button.delete=Delete
