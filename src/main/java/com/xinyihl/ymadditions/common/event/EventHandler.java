@@ -1,7 +1,7 @@
 package com.xinyihl.ymadditions.common.event;
 
 
-import appeng.util.Platform;
+import ae2.util.Platform;
 import com.xinyihl.ymadditions.Tags;
 import com.xinyihl.ymadditions.api.IContaierTickable;
 import com.xinyihl.ymadditions.api.IReadyable;

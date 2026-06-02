@@ -1,11 +1,11 @@
 package com.xinyihl.ymadditions.common.title;
 
-import appeng.api.networking.GridHelper;
-import appeng.api.networking.GridFlags;
-import appeng.api.networking.IGridNode;
-import appeng.api.networking.IGridConnection;
-import appeng.api.util.AECableType;
-import appeng.core.AEConfig;
+import ae2.api.networking.GridHelper;
+import ae2.api.networking.GridFlags;
+import ae2.api.networking.IGridNode;
+import ae2.api.networking.IGridConnection;
+import ae2.api.util.AECableType;
+import ae2.core.AEConfig;
 import com.xinyihl.ymadditions.Configurations;
 import com.xinyihl.ymadditions.api.entity.Network;
 import com.xinyihl.ymadditions.common.data.DataStorage;
@@ -154,11 +154,10 @@ public class TileNetworkHub extends TileMeBase {
         World thatWorld = DimensionManager.getWorld(pos.getDimension());
         if (thatWorld == null || !thatWorld.isBlockLoaded(pos.toBlockPos())) return;
         TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
-        if (!(tile instanceof TileNetworkHub)) {
+        if (!(tile instanceof TileNetworkHub that)) {
             DataStorage.get(thatWorld).removeNetwork(this.networkUuid);
             return;
         }
-        TileNetworkHub that = (TileNetworkHub) tile;
         power = NetHubPowerUsage.calcNetHubPowerUsage(this.getPos(), that.getPos(), this.world.provider.getDimension(), thatWorld.provider.getDimension());
         IGridNode thisNode = this.getActionableNode();
         IGridNode thatNode = that.getActionableNode();
