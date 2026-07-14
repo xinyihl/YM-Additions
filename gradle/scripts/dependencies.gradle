@@ -1,13 +1,11 @@
 apply from: 'gradle/scripts/helpers.gradle'
 
 repositories {
-    flatDir {
-        dirs("lib")
-    }
     // Other repositories described by default:
     // CleanroomMC: https://maven.cleanroommc.com
     maven {
-        url = 'https://www.jitpack.io'
+        name = "Jitpack"
+        url = uri("https://jitpack.io")
     }
     maven {
         name = 'CurseMaven'
@@ -43,7 +41,7 @@ dependencies {
     // 'curse.maven:had-enough-items-557549:4543375' << had-enough-items = project slug, 557549 = project id, 4543375 = file id
     // Full documentation: https://cursemaven.com/
 
-    modImplementation name: 'AppliedEnergistics2-Supergiant', version: '1.0.1', classifier: 'dev'
+    modImplementation "com.github.FormlessDragon:Applied-Energistics-2-Supergiant:v1.0.9"
     modImplementation "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.698"
     modImplementation "curse.maven:theoneprobe-245211:2667280"
     modImplementation "curse.maven:hadenoughitems-557549:5229422"
