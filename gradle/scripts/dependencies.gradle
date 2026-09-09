@@ -1,31 +1,51 @@
 apply from: 'gradle/scripts/helpers.gradle'
 
 repositories {
-    // Other repositories described by default:
-    // CleanroomMC: https://maven.cleanroommc.com
+    flatDir {
+        dirs('libs') // /libs
+    }
     maven {
-        name = "Jitpack"
-        url = uri("https://jitpack.io")
+        name = 'CleanroomMC'
+        url = 'https://maven.cleanroommc.com'
+    }
+    maven {
+        // Hosts the Cleanroom companion libraries (lwjglx, cleanmix, ...).
+        name = 'Outlands'
+        url = 'https://maven.outlands.top/releases'
     }
     maven {
         name = 'CurseMaven'
         url = 'https://cursemaven.com'
-    }
-    maven {
-        name = 'blamejared'
-        url = 'https://maven.blamejared.com'
+        content {
+            includeGroup 'curse.maven'
+        }
     }
     maven {
         name = 'CleanroomCurseMaven'
         url = 'https://curse.cleanroommc.com'
+        content {
+            includeGroup 'curse.maven'
+        }
     }
     maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+    }
+    maven {
+        name = 'Jitpack'
+        url = 'https://jitpack.io'
     }
     mavenCentral()
     mavenLocal() // Must be last for caching to work
 }
+
 
 dependencies {
     compileOnly "com.cleanroommc:sponge-mixin:0.20.13+mixin.0.8.7"
@@ -41,10 +61,10 @@ dependencies {
     // 'curse.maven:had-enough-items-557549:4543375' << had-enough-items = project slug, 557549 = project id, 4543375 = file id
     // Full documentation: https://cursemaven.com/
 
-    modImplementation "com.github.FormlessDragon:Applied-Energistics-2-Supergiant:v1.0.9"
+    modImplementation "com.github.FormlessDragon:Applied-Energistics-2-Supergiant:v1.1.0"
     modImplementation "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.698"
     modImplementation "curse.maven:theoneprobe-245211:2667280"
-    modImplementation "curse.maven:hadenoughitems-557549:5229422"
+    modImplementation 'mezz:jei:4.35.1'
 
 //    modImplementation files('libs/AppliedEnergistics2-Supergiant-1.0.0.jar')
 

@@ -23,10 +23,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.ChunkCache;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,18 +58,6 @@ public class BlockNetworkHub extends Block {
     @Override
     protected BlockStateContainer createBlockState() {
         return new BlockStateContainer(this, CONNECT);
-    }
-
-    @Nonnull
-    @Override
-    public IBlockState getActualState(@Nonnull IBlockState state, @Nonnull IBlockAccess worldIn, @Nonnull BlockPos pos) {
-        boolean connect = false;
-        TileEntity tile = worldIn instanceof ChunkCache ? ((ChunkCache) worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
-        if (tile instanceof TileNetworkHub) {
-            TileNetworkHub tn = (TileNetworkHub) tile;
-            connect = tn.isConnected();
-        }
-        return super.getActualState(state, worldIn, pos).withProperty(CONNECT, connect);
     }
 
     @Override
