@@ -15,6 +15,7 @@ import com.xinyihl.ymadditions.common.integration.crt.NetHubPowerUsage;
 import com.xinyihl.ymadditions.common.registry.Registry;
 import com.xinyihl.ymadditions.common.title.base.TileMeBase;
 import com.xinyihl.ymadditions.common.utils.BlockPosDim;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -27,6 +28,8 @@ import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static com.xinyihl.ymadditions.common.block.BlockNetworkHub.CONNECT;
 
 public class TileNetworkHub extends TileMeBase {
     private boolean isHead = false;
@@ -74,11 +77,20 @@ public class TileNetworkHub extends TileMeBase {
                     howMany = Math.max(gc.getUsedChannels(), howMany);
                 }
                 this.surplusChannels = Math.max(AEConfig.instance().getDenseChannelCapacity() - howMany, 0);
+                this.sync();
             }
 
             if (!this.isHead && this.connection == null) {
                 this.setupConnection(network);
             }
+        }
+    }
+
+    @Override
+    public void sync() {
+        if (world != null && !world.isRemote) {
+            IBlockState state = world.getBlockState(pos);
+            world.setBlockState(pos, state.withProperty(CONNECT, isConnected), 3);
         }
     }
 
@@ -171,7 +183,6 @@ public class TileNetworkHub extends TileMeBase {
                 TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
                 if (tile instanceof TileNetworkHub) {
                     ((TileNetworkHub) tile).breakConnection();
-                    ((TileNetworkHub) tile).sync();
                 }
             }
             storage.removeNetwork(this.networkUuid);
@@ -191,6 +202,7 @@ public class TileNetworkHub extends TileMeBase {
             this.connection = null;
         }
         this.getProxy().setIdlePowerUsage(0);
+        this.sync();
     }
 
     @Override
@@ -199,7 +211,9 @@ public class TileNetworkHub extends TileMeBase {
         DataStorage storage = DataStorage.get(this.world);
         Network network = storage.getNetwork(this.networkUuid);
         if (network == null) {
-            this.unsetAll();
+            this.setHead(false);
+            this.setConnected(false);
+            this.setNetworkUuid(null);
             return;
         }
         if (this.connection != null) {
