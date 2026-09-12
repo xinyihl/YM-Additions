@@ -90,6 +90,7 @@ public class TileNetworkHub extends TileMeBase {
     public void sync() {
         if (world != null && !world.isRemote) {
             IBlockState state = world.getBlockState(pos);
+            if (state.getBlock() != Registry.blockNetworkHub) return;
             world.setBlockState(pos, state.withProperty(CONNECT, isConnected), 3);
         }
     }
@@ -180,6 +181,7 @@ public class TileNetworkHub extends TileMeBase {
         if (this.isHead) {
             for (BlockPosDim pos : new HashSet<>(network.getReceivePos())) {
                 World thatWorld = DimensionManager.getWorld(pos.getDimension());
+                if (thatWorld == null) continue;
                 TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
                 if (tile instanceof TileNetworkHub) {
                     ((TileNetworkHub) tile).breakConnection();
