@@ -23,17 +23,18 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.xinyihl.ymadditions.common.network.PacketServerToClient.ServerToClient.CONTAINER_SYNC;
 
 public class ContainerNetworkHub extends Container implements IActionHandler, IContaierTickable, ISyncable {
+    private static final String PINNED_NETWORK_KEY = "ymadditionsPinnedNetwork";
 
     public EntityPlayer player;
     public TileNetworkHub networkHub;
     public UUID selectedNetwork;
     public DataStorage storage;
     public Integer surplusChannels;
+    public UUID pinnedNetwork;
     public Map<UUID, Network> networks = new LinkedHashMap<>();
     public Map<UUID, Group> groups = new LinkedHashMap<>();
 
@@ -45,6 +46,7 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
         this.networks = storage.getNetworks();
         this.groups = storage.getGroups();
         this.selectedNetwork = networkHub.getNetworkUuid();
+        this.pinnedNetwork = readPinnedNetwork();
     }
 
     public Network getSelected() {
@@ -84,6 +86,23 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
                     this.selectedNetwork = uuid;
                 }
                 this.sync();
+                break;
+            }
+            case "pin-network": {
+                Network network = this.storage.getNetwork(this.selectedNetwork);
+                if (network != null && network.hasPermission(this.player, User.Perm.USER)) {
+                    if (Objects.equals(this.pinnedNetwork, this.selectedNetwork)) {
+                        this.player.getEntityData().removeTag(PINNED_NETWORK_KEY + "Most");
+                        this.player.getEntityData().removeTag(PINNED_NETWORK_KEY + "Least");
+                        this.pinnedNetwork = null;
+                    } else {
+                        this.player.getEntityData().setUniqueId(PINNED_NETWORK_KEY, this.selectedNetwork);
+                        this.pinnedNetwork = this.selectedNetwork;
+                    }
+                    this.sync();
+                } else {
+                    this.player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.nopermission"), true);
+                }
                 break;
             }
             case "create-network": { // 创建网络
@@ -194,8 +213,7 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
                 World thatWorld = DimensionManager.getWorld(pos.getDimension());
                 if (thatWorld != null && thatWorld.isBlockLoaded(pos.toBlockPos())) {
                     TileEntity tile = thatWorld.getTileEntity(pos.toBlockPos());
-                    if (tile instanceof TileNetworkHub) {
-                        TileNetworkHub that = (TileNetworkHub) tile;
+                    if (tile instanceof TileNetworkHub that) {
                         this.surplusChannels = that.getSurplusChannels();
                     }
                 }
@@ -207,13 +225,14 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
     @Override
     public NBTTagCompound getSyncData(NBTTagCompound tag) {
         if (this.selectedNetwork != null) tag.setUniqueId("networkUuid", this.selectedNetwork);
+        if (this.pinnedNetwork != null) tag.setUniqueId("pinnedNetworkUuid", this.pinnedNetwork);
         if (this.surplusChannels != null) tag.setInteger("surplusChannels", this.surplusChannels);
         NBTTagList list1 = new NBTTagList();
         NBTTagList list2 = new NBTTagList();
-        for (Network network : this.networks.values().stream().filter(v -> v.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
+        for (Network network : this.networks.values().stream().filter(v -> v.hasPermission(player, User.Perm.USER)).toList()) {
             list1.appendTag(network.to(new NBTTagCompound()));
         }
-        for (Group group : this.groups.values().stream().filter(u -> u.hasPermission(player, User.Perm.USER)).collect(Collectors.toList())) {
+        for (Group group : this.groups.values().stream().filter(u -> u.hasPermission(player, User.Perm.USER)).toList()) {
             list2.appendTag(group.deepCopy().injectOnlinePlayers().injectOwner().to(new NBTTagCompound()));
         }
         tag.setTag("networks", list1);
@@ -224,9 +243,15 @@ public class ContainerNetworkHub extends Container implements IActionHandler, IC
     @Override
     public void doSyncFrom(NBTTagCompound tag) {
         this.selectedNetwork = tag.hasUniqueId("networkUuid") ? tag.getUniqueId("networkUuid") : null;
+        this.pinnedNetwork = tag.hasUniqueId("pinnedNetworkUuid") ? tag.getUniqueId("pinnedNetworkUuid") : null;
         this.surplusChannels = tag.hasKey("surplusChannels") ? tag.getInteger("surplusChannels") : null;
         this.updateNetworks(tag);
         this.updateGroups(tag);
+    }
+
+    private UUID readPinnedNetwork() {
+        NBTTagCompound data = this.player.getEntityData();
+        return data.hasUniqueId(PINNED_NETWORK_KEY) ? data.getUniqueId(PINNED_NETWORK_KEY) : null;
     }
 
     private void updateNetworks(NBTTagCompound tag) {

@@ -130,7 +130,7 @@ public abstract class ListCtrl<T extends IListObject> extends Gui {
     public void refresh() {
         this.drawItems.clear();
         int drawSize = this.height / this.itemHeight + 2;
-        List<T> filter = this.items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getName()).find()).collect(Collectors.toList());
+        List<T> filter = this.items.stream().filter(n -> Pattern.compile(this.filter).matcher(n.getName()).find()).toList();
         for (int i = 0; i < drawSize; i++) {
             int index = this.scrollOffset / this.itemHeight + i;
             if (index >= filter.size()) break;

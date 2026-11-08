@@ -32,7 +32,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onServerTick(ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            if(readyQueue.isEmpty()) {
+            if (readyQueue.isEmpty()) {
                 return;
             }
             IReadyable task;

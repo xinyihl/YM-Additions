@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nonnull;
 
@@ -21,26 +22,31 @@ public class MyLockIconButton extends GuiLockIconButton {
             mc.getTextureManager().bindTexture(new ResourceLocation(Tags.MOD_ID, "textures/gui/widgets.png"));
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             boolean flag = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            Icon guilockiconbutton$icon;
-
-            if (this.isLocked()) {
-                if (!this.enabled) {
-                    guilockiconbutton$icon = Icon.LOCKED_DISABLED;
-                } else if (flag) {
-                    guilockiconbutton$icon = Icon.LOCKED_HOVER;
-                } else {
-                    guilockiconbutton$icon = Icon.LOCKED;
-                }
-            } else if (!this.enabled) {
-                guilockiconbutton$icon = Icon.UNLOCKED_DISABLED;
-            } else if (flag) {
-                guilockiconbutton$icon = Icon.UNLOCKED_HOVER;
-            } else {
-                guilockiconbutton$icon = Icon.UNLOCKED;
-            }
+            Icon guilockiconbutton$icon = getGuilockiconbutton(flag);
 
             this.drawTexturedModalRect(this.x, this.y, guilockiconbutton$icon.getX(), guilockiconbutton$icon.getY(), this.width, this.height);
         }
+    }
+
+    private @NonNull Icon getGuilockiconbutton(boolean flag) {
+        Icon guilockiconbutton$icon;
+
+        if (this.isLocked()) {
+            if (!this.enabled) {
+                guilockiconbutton$icon = Icon.LOCKED_DISABLED;
+            } else if (flag) {
+                guilockiconbutton$icon = Icon.LOCKED_HOVER;
+            } else {
+                guilockiconbutton$icon = Icon.LOCKED;
+            }
+        } else if (!this.enabled) {
+            guilockiconbutton$icon = Icon.UNLOCKED_DISABLED;
+        } else if (flag) {
+            guilockiconbutton$icon = Icon.UNLOCKED_HOVER;
+        } else {
+            guilockiconbutton$icon = Icon.UNLOCKED;
+        }
+        return guilockiconbutton$icon;
     }
 
     @SideOnly(Side.CLIENT)

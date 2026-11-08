@@ -17,6 +17,8 @@ import java.util.UUID;
 import static com.xinyihl.ymadditions.common.network.PacketClientToServer.ClientToServer.BUTTON_ACTION;
 
 public class Utils {
+    private static final String[] UNITS = {"", "K", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"};
+
     public static boolean isPlayerOp(EntityPlayer player) {
         MinecraftServer server = player.getServer();
         boolean isOp = false;
@@ -25,8 +27,6 @@ public class Utils {
         }
         return isOp;
     }
-
-    private static final String[] UNITS = {"", "K", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"};
 
     public static String formatCompact(long amount) {
         if (amount == 0) return "0";

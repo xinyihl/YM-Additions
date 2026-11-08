@@ -23,14 +23,14 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public class Registry {
 
-    public static Block blockNetworkHub;
-    public static Item itemNetworkHub;
     public static final CreativeTabs CREATIVE_TAB = new CreativeTabs("yudream_tab") {
         @Nonnull
         public ItemStack createIcon() {
             return new ItemStack(itemNetworkHub);
         }
     };
+    public static Block blockNetworkHub;
+    public static Item itemNetworkHub;
 
     @SubscribeEvent
     public static void registerItem(RegistryEvent.Register<Item> event) {

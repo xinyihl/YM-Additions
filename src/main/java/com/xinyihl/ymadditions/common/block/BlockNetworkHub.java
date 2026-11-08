@@ -94,9 +94,16 @@ public class BlockNetworkHub extends Block {
         super.onBlockPlacedBy(world, pos, state, placer, stack);
         if (!world.isRemote) {
             TileEntity te = world.getTileEntity(pos);
-            if (te instanceof TileNetworkHub && placer instanceof EntityPlayer) {
-                TileNetworkHub tn = (TileNetworkHub) te;
-                tn.setOwner((EntityPlayer) placer);
+            if (te instanceof TileNetworkHub tn && placer instanceof EntityPlayer player) {
+                tn.setOwner(player);
+                if (player.getEntityData().hasUniqueId("ymadditionsPinnedNetwork")) {
+                    java.util.UUID pinnedNetworkId = player.getEntityData().getUniqueId("ymadditionsPinnedNetwork");
+                    Network network = DataStorage.get(world).getNetwork(pinnedNetworkId);
+                    if (network != null && network.hasPermission(player, User.Perm.USER)) {
+                        tn.setNetworkUuid(pinnedNetworkId);
+                        tn.markDirty();
+                    }
+                }
             }
         }
     }
@@ -116,8 +123,7 @@ public class BlockNetworkHub extends Block {
     public void breakBlock(World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         if (!world.isRemote) {
             TileEntity te = world.getTileEntity(pos);
-            if (te instanceof TileNetworkHub) {
-                TileNetworkHub tn = (TileNetworkHub) te;
+            if (te instanceof TileNetworkHub tn) {
                 tn.breakConnection();
             }
         }

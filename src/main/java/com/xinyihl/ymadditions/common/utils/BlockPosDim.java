@@ -30,9 +30,8 @@ public class BlockPosDim extends BlockPos {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof BlockPosDim)) return false;
+        if (!(o instanceof BlockPosDim that)) return false;
         if (!super.equals(o)) return false;
-        BlockPosDim that = (BlockPosDim) o;
         return dimension == that.dimension;
     }
 

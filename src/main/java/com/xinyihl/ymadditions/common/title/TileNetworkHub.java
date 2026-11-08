@@ -53,7 +53,7 @@ public class TileNetworkHub extends TileMeBase {
         return AECableType.DENSE_SMART;
     }
 
-    protected void onTick(){
+    protected void onTick() {
         if (this.networkUuid != null) {
             DataStorage storage = DataStorage.get(this.world);
             Network network = storage.getNetwork(this.networkUuid);
@@ -63,7 +63,7 @@ public class TileNetworkHub extends TileMeBase {
             }
 
             BlockPosDim pos = network.getSendPos();
-            if (!this.isHead && pos!= null && this.getPos().equals(pos.toBlockPos())) {
+            if (!this.isHead && pos != null && this.getPos().equals(pos.toBlockPos())) {
                 this.setHead(true);
             }
 

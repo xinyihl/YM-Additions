@@ -10,7 +10,6 @@ import com.xinyihl.ymadditions.common.container.ContainerNetworkHub;
 import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class GuiNetworkHubUser extends GuiContainer {
+public class GuiNetworkHubUser extends GuiBase {
     private final ContainerNetworkHub containerNetworkHub;
 
     private ListCtrl<User> listCtrl;
@@ -59,7 +58,7 @@ public class GuiNetworkHubUser extends GuiContainer {
         //this.buttonList.add(this.userScreen);
 
         List<User> users = this.containerNetworkHub.getGroup().getUsers();
-        this.listCtrl = new ListCtrl<User>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, users) {
+        this.listCtrl = new ListCtrl<>(this.mc, guiLeft + 20, guiTop + 15, 165, 136, 20, users) {
             @Override
             protected IListItem<User> getItem(Object id, String text, User o, int x, int y, int width, int height) {
                 return new ListItem<User>(id, text, o, x, y, width, height) {
@@ -137,6 +136,10 @@ public class GuiNetworkHubUser extends GuiContainer {
             this.listCtrl.draw(mouseX, mouseY, partialTicks);
         } else {
             this.drawCenteredString(mc.fontRenderer, I18n.format("gui.ymadditions.network_hub.user.no_selected"), guiLeft + xSize / 2, 100, 0xFFFFFFFF);
+        }
+
+        if (this.isMouseOverButton(netScreen, mouseX, mouseY)) {
+            this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.net.desc"), mouseX, mouseY);
         }
     }
 

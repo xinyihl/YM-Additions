@@ -24,8 +24,7 @@ public class HeadDeleteProtectionHandler {
         EntityPlayer player = event.getPlayer();
         if (state.getBlock() instanceof BlockNetworkHub) {
             TileEntity tile = world.getTileEntity(pos);
-            if (tile instanceof TileNetworkHub) {
-                TileNetworkHub hub = (TileNetworkHub) tile;
+            if (tile instanceof TileNetworkHub hub) {
                 if (hub.isHead()) {
                     player.sendStatusMessage(new TextComponentTranslation("statusmessage.ymadditions.info.head_delete_protection"), true);
                     event.setCanceled(true);

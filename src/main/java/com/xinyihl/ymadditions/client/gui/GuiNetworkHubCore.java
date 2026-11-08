@@ -11,7 +11,6 @@ import com.xinyihl.ymadditions.common.utils.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLockIconButton;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
@@ -31,7 +30,7 @@ import java.util.UUID;
 
 /* 由魔法数字组成的 GUI （；´д｀）ゞ */
 @SideOnly(Side.CLIENT)
-public class GuiNetworkHubCore extends GuiContainer {
+public class GuiNetworkHubCore extends GuiBase {
     private static String searchNet = "";
     private final ContainerNetworkHub containerNetworkHub;
     private ListCtrl<Network> listCtrl;
@@ -46,6 +45,7 @@ public class GuiNetworkHubCore extends GuiContainer {
 
     //private IconButton netScreen;
     private IconButton userScreen;
+    private IconButton pinButton;
 
     public GuiNetworkHubCore(ContainerNetworkHub containerNetworkHub) {
         super(containerNetworkHub);
@@ -58,6 +58,7 @@ public class GuiNetworkHubCore extends GuiContainer {
         List<Rectangle> extraAreas = new ArrayList<>();
         extraAreas.add(new Rectangle(this.userScreen.x, this.userScreen.y, this.userScreen.width, this.userScreen.height));
         extraAreas.add(new Rectangle(this.lockButton.x, this.lockButton.y, this.lockButton.width, this.lockButton.height));
+        extraAreas.add(new Rectangle(this.pinButton.x, this.pinButton.y, this.pinButton.width, this.pinButton.height));
         return extraAreas;
     }
 
@@ -67,13 +68,15 @@ public class GuiNetworkHubCore extends GuiContainer {
 
         //this.netScreen = new IconButton(99998, guiLeft + 201, guiTop - 20, 40, 146);
         this.userScreen = new IconButton(99999, guiLeft + 201, guiTop + 5, 60, 146);
+        this.pinButton = new IconButton(100000, guiLeft + 201, guiTop + 45, 80, 146);
+        this.pinButton.setSelected(containerNetworkHub.selectedNetwork != null && containerNetworkHub.selectedNetwork.equals(containerNetworkHub.pinnedNetwork));
 
         //this.netScreen.setSelected(true);
 
-        this.listCtrl = new ListCtrl<Network>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
+        this.listCtrl = new ListCtrl<>(this.mc, guiLeft + 7, guiTop + 35, 86, 116, 20, this.containerNetworkHub.networks.values()) {
             @Override
             protected IListItem<Network> getItem(Object id, String text, Network o, int x, int y, int width, int height) {
-                return new ListItem<Network>(id, text, o, x, y, width, height) {
+                return new ListItem<>(id, text, o, x, y, width, height) {
                     @Override
                     public void click() {
                         UUID uuid = get().getUuid();
@@ -124,6 +127,7 @@ public class GuiNetworkHubCore extends GuiContainer {
 
         //this.buttonList.add(this.netScreen);
         this.buttonList.add(this.userScreen);
+        this.buttonList.add(this.pinButton);
         this.buttonList.add(this.createButton);
         this.buttonList.add(this.deleteButton);
         this.buttonList.add(this.connectButton);
@@ -150,6 +154,8 @@ public class GuiNetworkHubCore extends GuiContainer {
         this.disConnectButton.enabled = isSelected && !isHead && isConnected;
         this.connectButton.enabled = isSelected && !isHead;
         this.deleteButton.enabled = isSelected;
+        this.pinButton.enabled = isSelected;
+        this.pinButton.setSelected(isSelected && containerNetworkHub.selectedNetwork.equals(containerNetworkHub.pinnedNetwork));
 
         this.listCtrl.draw(mouseX, mouseY, partialTicks);
 
@@ -158,6 +164,14 @@ public class GuiNetworkHubCore extends GuiContainer {
 
         if (this.isMouseOverButton(lockButton, mouseX, mouseY)) {
             this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.public.desc"), mouseX, mouseY);
+        }
+
+        if (this.isMouseOverButton(userScreen, mouseX, mouseY)) {
+            this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.user.desc"), mouseX, mouseY);
+        }
+
+        if (this.isMouseOverButton(pinButton, mouseX, mouseY)) {
+            this.drawHoveringText(I18n.format("gui.ymadditions.network_hub.button.pin.desc"), mouseX, mouseY);
         }
     }
 
@@ -204,7 +218,7 @@ public class GuiNetworkHubCore extends GuiContainer {
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.dimension_id") + " " + (posDim == null ? "Unknown" : posDim.getDimension()), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.public." + overt), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
         StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.state." + connected), rightPanelX, rightPanelY += 12, 0xFFFFFF, scale);
-        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.power") + " " + Utils.formatCompact(power)  + "RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF, scale);
+        StringRenderUtil.drawString(this.fontRenderer, I18n.format("gui.ymadditions.network_hub.info.power") + " " + Utils.formatCompact(power) + "RF/t", rightPanelX, rightPanelY + 12, 0xFFFFFF, scale);
     }
 
     @Override
@@ -241,6 +255,10 @@ public class GuiNetworkHubCore extends GuiContainer {
 
         if (ba.id == lockButton.id) {
             Utils.sendAction("switch-public");
+        }
+
+        if (ba.id == pinButton.id) {
+            Utils.sendAction("pin-network");
         }
     }
 
@@ -305,13 +323,5 @@ public class GuiNetworkHubCore extends GuiContainer {
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         super.mouseReleased(mouseX, mouseY, state);
         listCtrl.mouseReleased(mouseX, mouseY, state);
-    }
-
-    private boolean isMouseOverTextField(GuiTextField textField, int mouseX, int mouseY) {
-        return mouseX >= textField.x && mouseX < textField.x + textField.width && mouseY >= textField.y && mouseY < textField.y + textField.height;
-    }
-
-    private boolean isMouseOverButton(GuiButton button, int mouseX, int mouseY) {
-        return mouseX >= button.x && mouseY >= button.y && mouseX < button.x + button.width && mouseY < button.y + button.height;
     }
 }

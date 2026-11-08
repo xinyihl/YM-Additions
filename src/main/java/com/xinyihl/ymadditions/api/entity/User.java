@@ -121,8 +121,7 @@ public class User implements IListObject {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof User)) return false;
-        User user = (User) o;
+        if (!(o instanceof User user)) return false;
         return Objects.equals(uuid, user.uuid) && Objects.equals(name, user.name);
     }
 

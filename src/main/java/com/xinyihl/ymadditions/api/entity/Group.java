@@ -18,24 +18,6 @@ public class Group {
     private UUID uuid = null;
     private User owner = null;
 
-    public Group injectOnlinePlayers() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        if (server != null) {
-            Arrays.stream(server.getPlayerList().getOnlinePlayerProfiles())
-                    .map(User::create)
-                    .filter(user -> !(users.contains(user) || user.equals(owner)))
-                    .forEach(users::add);
-        }
-        return this;
-    }
-
-    public Group injectOwner() {
-        if (!users.contains(this.owner)) {
-            users.add(0, this.owner);
-        }
-        return this;
-    }
-
     private Group() {
 
     }
@@ -51,12 +33,30 @@ public class Group {
         return group;
     }
 
-    public void removeUser(User user) {
-        users.remove(user);
-    }
-
     public static Group empty() {
         return new Group();
+    }
+
+    public Group injectOnlinePlayers() {
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        if (server != null) {
+            Arrays.stream(server.getPlayerList().getOnlinePlayerProfiles())
+                    .map(User::create)
+                    .filter(user -> !(users.contains(user) || user.equals(owner)))
+                    .forEach(users::add);
+        }
+        return this;
+    }
+
+    public Group injectOwner() {
+        if (!users.contains(this.owner)) {
+            users.addFirst(this.owner);
+        }
+        return this;
+    }
+
+    public void removeUser(User user) {
+        users.remove(user);
     }
 
     public boolean hasPermission(@Nonnull EntityPlayer player, User.Perm perm) {
